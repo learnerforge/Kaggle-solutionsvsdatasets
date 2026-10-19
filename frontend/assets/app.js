@@ -61,8 +61,10 @@ function chip(status) {
 }
 
 function gateChip(comp) {
-  if (comp.reached === true) return '<span class="chip pass">gate reached</span>';
-  if (comp.reached === false) return '<span class="chip fail">gate not reached</span>';
+  const verdict = gateVerdict(comp);
+  if (verdict === "pass") return '<span class="chip pass">gate reached</span>';
+  if (verdict === "fail") return '<span class="chip fail">gate not reached</span>';
+  if (comp.target_score != null) return '<span class="chip na">gate pending</span>';
   return '<span class="chip na">no gate set</span>';
 }
 
@@ -107,16 +109,21 @@ const SKELETON = `
 
 /* ---------- score-gate maths (R5) -------------------------------------------- */
 
-/* Does the measured OOF score satisfy the gate? */
+/* Does the measured OOF score satisfy the gate? The measured numbers are the
+ * authority (R4); the engine's `reached` flag is the fallback for runs where
+ * cv/target are not both present. */
 function gateVerdict(comp) {
+  if (comp.cv_mean != null && comp.target_score != null) {
+    const cv = Number(comp.cv_mean);
+    const target = Number(comp.target_score);
+    if (Number.isFinite(cv) && Number.isFinite(target)) {
+      const higher = comp.higher_is_better !== false;
+      return (higher ? cv >= target : cv <= target) ? "pass" : "fail";
+    }
+  }
   if (comp.reached === true) return "pass";
   if (comp.reached === false) return "fail";
-  if (comp.cv_mean == null || comp.target_score == null) return null;
-  const cv = Number(comp.cv_mean);
-  const target = Number(comp.target_score);
-  if (!Number.isFinite(cv) || !Number.isFinite(target)) return null;
-  const higher = comp.higher_is_better !== false;
-  return (higher ? cv >= target : cv <= target) ? "pass" : "fail";
+  return null;
 }
 
 /* R5: a gap beyond 2x the CV std means the split is unrepresentative. */
@@ -275,7 +282,7 @@ function compCard(comp) {
       ${gateChip(comp)}
     </div>
     <div class="slugline">${esc(comp.slug)} · ${esc(comp.metric || "metric unknown")}
-      ${comp.higher_is_better === false ? " · lower is better" : ""} · ${statusChip(comp.status)}</div>
+      ${comp.higher_is_better === false ? " · lower is better" : ""} · ${statusChip(comp.status)}${comp.last_attempt_at ? ` · last attempt ${when(comp.last_attempt_at)}` : ""}</div>
     <div class="scores">
       <div><div class="k">OOF ${esc(comp.metric || "")}</div><div class="v${oofClass}">${fmt(comp.cv_mean)}</div></div>
       <div><div class="k">± std</div><div class="v">${fmt(comp.cv_std)}</div></div>
