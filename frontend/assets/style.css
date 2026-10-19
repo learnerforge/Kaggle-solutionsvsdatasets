@@ -1,28 +1,40 @@
 /* ==========================================================================
    Kaggle Solutions vs Datasets — dashboard theme
-   Engine-telemetry aesthetic: deep ink, mono numerals, status chips.
+   EXCITEMENT MODE: deep navy, electric orange, vivid yellow, glow accents.
+   High energy · Dynamic · Futuristic — mono numerals, status chips.
    No framework; served statically from GitHub Pages or any web server.
    ========================================================================== */
 
 :root {
   color-scheme: dark;
 
-  --ink: #0a0e13;
-  --panel: #111820;
-  --panel-2: #16202a;
-  --line: #223040;
-  --text: #d8e2ec;
-  --muted: #7d93a8;
-  --faint: #4c6076;
+  /* --- EXCITEMENT MODE palette ---------------------------------------------- */
+  --excitement-primary: #FF6D00;    /* Electric Orange — primary excitement  */
+  --excitement-secondary: #FFD600;  /* Vivid Yellow — energy and highlights   */
+  --excitement-accent: #FF2E93;     /* Hot Pink — playful excitement          */
+  --excitement-alert: #FF1744;      /* Neon Red — intensity and urgency       */
+  --excitement-purple: #B388FF;     /* Electric Purple — creative energy      */
+  --excitement-cyan: #00E5FF;       /* Bright Cyan — futuristic accents       */
+  --excitement-background: #101426; /* Deep Navy — dark background            */
+  --excitement-text: #FFFFFF;       /* Pure White — text on dark surfaces     */
 
-  --pass: #4ade80;
-  --fail: #f87171;
-  --warn: #fbbf24;
-  --info: #60a5fa;
-  --idle: #8b9aab;
+  /* --- semantic aliases used across the theme ------------------------------- */
+  --ink: var(--excitement-background);
+  --panel: #171c33;          /* raised surfaces derived from Deep Navy */
+  --panel-2: #1f2542;
+  --line: #2e3660;
+  --text: var(--excitement-text);
+  --muted: #a9b0cc;
+  --faint: #6e7799;
 
-  --accent: #a3e635;
-  --accent-dim: #65a30d;
+  --pass: var(--excitement-cyan);
+  --fail: var(--excitement-alert);
+  --warn: var(--excitement-secondary);
+  --info: var(--excitement-purple);
+  --idle: #7d86a8;
+
+  --accent: var(--excitement-primary);
+  --accent-dim: #c24e00;
 
   --mono: "SFMono-Regular", ui-monospace, "Cascadia Mono", Consolas, monospace;
   --sans: "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -41,17 +53,19 @@ html, body {
   line-height: 1.55;
 }
 
+/* accent glow: Electric Orange primary, Hot Pink used sparingly */
 body {
   background-image:
-    radial-gradient(1100px 500px at 85% -10%, rgba(163, 230, 53, 0.07), transparent 60%),
-    radial-gradient(900px 420px at -10% 0%, rgba(96, 165, 250, 0.06), transparent 55%);
+    radial-gradient(1100px 500px at 85% -10%, rgba(255, 109, 0, 0.13), transparent 60%),
+    radial-gradient(900px 420px at -10% 0%, rgba(255, 46, 147, 0.08), transparent 55%);
 }
 
 a { color: var(--accent); text-decoration: none; transition: color .15s ease; }
 a:hover { text-decoration: underline; }
 
+/* futuristic cyan focus ring — distinct from orange links/controls */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--excitement-cyan);
   outline-offset: 2px;
 }
 
@@ -82,7 +96,7 @@ code, .mono { font-family: var(--mono); font-size: 0.92em; }
 
 header.site {
   border-bottom: 1px solid var(--line);
-  background: rgba(10, 14, 19, 0.85);
+  background: rgba(16, 20, 38, 0.85);
   backdrop-filter: blur(8px);
   position: sticky;
   top: 0;
@@ -114,9 +128,10 @@ header.site {
   height: 30px;
   border-radius: 8px;
   background: linear-gradient(135deg, var(--accent), var(--accent-dim));
-  color: #0a0e13;
+  color: var(--ink);
   font-family: var(--mono);
   font-weight: 800;
+  box-shadow: 0 0 14px rgba(255, 109, 0, 0.45);
 }
 
 nav.site { display: flex; gap: 4px; flex-wrap: wrap; }
@@ -131,7 +146,12 @@ nav.site a {
 
 nav.site a:hover { color: var(--text); background: var(--panel-2); text-decoration: none; }
 nav.site a.active,
-nav.site a[aria-current="page"] { color: var(--ink); background: var(--accent); font-weight: 600; }
+nav.site a[aria-current="page"] {
+  color: var(--ink);
+  background: var(--accent);
+  font-weight: 600;
+  box-shadow: 0 0 16px rgba(255, 109, 0, 0.35);
+}
 
 .head-meta {
   margin-left: auto;
@@ -151,7 +171,18 @@ nav.site a[aria-current="page"] { color: var(--ink); background: var(--accent); 
   line-height: 1.15;
 }
 
-.hero h1 .lime { color: var(--accent); }
+/* energy highlight: Vivid Yellow, upgraded to a yellow→orange gradient where
+   background-clip:text is supported (old browsers keep the solid yellow) */
+.hero h1 .flare { color: var(--excitement-secondary); }
+
+@supports (-webkit-background-clip: text) {
+  .hero h1 .flare {
+    background: linear-gradient(120deg, var(--excitement-secondary), var(--excitement-primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
 
 .hero p.lede {
   max-width: 760px;
@@ -248,11 +279,11 @@ pre.tree {
   white-space: nowrap;
 }
 
-.chip.pass { color: var(--pass); border-color: rgba(74, 222, 128, 0.35); background: rgba(74, 222, 128, 0.08); }
-.chip.fail { color: var(--fail); border-color: rgba(248, 113, 113, 0.35); background: rgba(248, 113, 113, 0.08); }
-.chip.warn { color: var(--warn); border-color: rgba(251, 191, 36, 0.35); background: rgba(251, 191, 36, 0.08); }
-.chip.na   { color: var(--idle); border-color: rgba(139, 154, 170, 0.30); background: rgba(139, 154, 170, 0.06); }
-.chip.info { color: var(--info); border-color: rgba(96, 165, 250, 0.35); background: rgba(96, 165, 250, 0.08); }
+.chip.pass { color: var(--pass); border-color: rgba(0, 229, 255, 0.35); background: rgba(0, 229, 255, 0.08); }
+.chip.fail { color: var(--fail); border-color: rgba(255, 23, 68, 0.35); background: rgba(255, 23, 68, 0.08); }
+.chip.warn { color: var(--warn); border-color: rgba(255, 214, 0, 0.35); background: rgba(255, 214, 0, 0.08); }
+.chip.na   { color: var(--idle); border-color: rgba(125, 134, 168, 0.30); background: rgba(125, 134, 168, 0.06); }
+.chip.info { color: var(--info); border-color: rgba(179, 136, 255, 0.35); background: rgba(179, 136, 255, 0.08); }
 
 /* --- tables ------------------------------------------------------------------ */
 
@@ -277,7 +308,7 @@ table.data th.num { text-align: right; }
 
 table.data td {
   padding: 9px 10px;
-  border-bottom: 1px solid rgba(34, 48, 64, 0.55);
+  border-bottom: 1px solid rgba(46, 54, 96, 0.55);
   vertical-align: top;
 }
 
@@ -286,7 +317,7 @@ table.data td.num { font-family: var(--mono); text-align: right; }
 table.data td.evidence { color: var(--muted); font-size: 13px; }
 
 table.data tbody tr { transition: background-color .12s ease; }
-table.data tbody tr:hover { background: rgba(22, 32, 42, 0.6); }
+table.data tbody tr:hover { background: rgba(31, 37, 66, 0.6); }
 
 .scroll-x { overflow-x: auto; }
 
@@ -306,6 +337,13 @@ table.data tbody tr:hover { background: rgba(22, 32, 42, 0.6); }
   display: flex;
   flex-direction: column;
   gap: 10px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+/* playful excitement: Hot Pink glow on hover, sparingly */
+.comp:hover {
+  border-color: rgba(255, 46, 147, 0.5);
+  box-shadow: 0 0 22px rgba(255, 46, 147, 0.14);
 }
 
 .comp .top { display: flex; align-items: baseline; gap: 10px; justify-content: space-between; }
@@ -342,7 +380,7 @@ ol.pipeline { list-style: none; counter-reset: step; margin: 0; padding: 0; }
 ol.pipeline li {
   counter-increment: step;
   padding: 10px 0 10px 44px;
-  border-bottom: 1px solid rgba(34, 48, 64, 0.55);
+  border-bottom: 1px solid rgba(46, 54, 96, 0.55);
   position: relative;
 }
 
@@ -411,7 +449,7 @@ ol.pipeline .desc { color: var(--muted); font-size: 13.5px; }
   color: var(--muted);
 }
 
-.state.error { border-color: rgba(248, 113, 113, 0.5); color: var(--fail); }
+.state.error { border-color: rgba(255, 23, 68, 0.5); color: var(--fail); }
 
 /* --- footer (outside <main>, border runs full bleed) ------------------------------ */
 
@@ -445,13 +483,17 @@ a.btn {
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
-  transition: border-color .15s ease, background-color .15s ease;
+  transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
 }
 
 a.btn:hover { border-color: var(--faint); background: var(--panel); text-decoration: none; }
 
 a.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--ink); }
-a.btn.primary:hover { background: #b5f24d; border-color: #b5f24d; }
+a.btn.primary:hover {
+  background: #ff8a33;
+  border-color: #ff8a33;
+  box-shadow: 0 0 24px rgba(255, 109, 0, 0.45);
+}
 
 /* --- component: stat card tones ------------------------------------------------- */
 
@@ -475,7 +517,7 @@ ol.pipeline::before {
 }
 
 ol.pipeline li { transition: background-color .15s ease; }
-ol.pipeline li:hover { background: rgba(22, 32, 42, 0.5); }
+ol.pipeline li:hover { background: rgba(31, 37, 66, 0.5); }
 ol.pipeline li::before { background: var(--panel-2); z-index: 1; }
 
 /* --- component: progress meter (gate attainment, requirement coverage) ----------- */
@@ -551,7 +593,7 @@ a.chip:hover { text-decoration: none; border-color: var(--faint); }
 .scroll-x thead th:first-child { z-index: 1; }
 .scroll-x tbody tr:hover td:first-child { background: var(--panel-2); }
 
-tr:target td { background: rgba(163, 230, 53, 0.10); }
+tr:target td { background: rgba(255, 109, 0, 0.12); }
 
 table.data tr.sum td {
   background: var(--panel-2);
@@ -591,7 +633,7 @@ table.data tr.sum td {
 }
 
 .btn-copy:hover { color: var(--text); border-color: var(--faint); }
-.btn-copy.ok { color: var(--pass); border-color: rgba(74, 222, 128, 0.35); }
+.btn-copy.ok { color: var(--pass); border-color: rgba(0, 229, 255, 0.35); }
 
 /* textarea parked off-screen for the execCommand copy fallback */
 .offscreen { position: fixed; left: -9999px; top: 0; opacity: 0; }
