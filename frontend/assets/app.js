@@ -10,7 +10,7 @@
 
 const PAGE = document.body.dataset.page || "index";
 
-/* ---------- helpers -------------------------------------------------------- */
+/* ---------- primitives ------------------------------------------------------- */
 
 function esc(value) {
   return String(value ?? "").replace(/[&<>"']/g, (c) => ({
@@ -24,10 +24,33 @@ function fmt(value, digits = 5) {
   return Number.isFinite(n) ? n.toFixed(digits) : "—";
 }
 
+function fmtPct(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? `${n.toFixed(1)}%` : "—";
+}
+
 /* Keep the raw ISO value in datetime= so timestamps stay machine-readable. */
 function when(value) {
   if (!value) return "—";
   return `<time datetime="${esc(value)}">${esc(value)}</time>`;
+}
+
+function ageLabel(iso) {
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return "";
+  const s = Math.max(0, (Date.now() - t) / 1000);
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
+
+/* The cycle regenerates every 24h; older than that means a run was missed. */
+function freshness(iso) {
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return null;
+  const stale = Date.now() - t > 25 * 3600 * 1000;
+  return { cls: stale ? "stale" : "fresh", text: ageLabel(iso) };
 }
 
 const CHIP_CLASS = { pass: "pass", fail: "fail", warn: "warn", "n/a": "na", na: "na" };
@@ -75,7 +98,16 @@ function mount(id, html) {
   if (el) el.innerHTML = html;
 }
 
-/* Does the measured OOF score satisfy the gate? (R5) */
+const SKELETON = `
+  <div class="state skeleton" aria-hidden="true">
+    <span class="sk-line w-75"></span>
+    <span class="sk-line w-45"></span>
+    <span class="sk-line w-60"></span>
+  </div>`;
+
+/* ---------- score-gate maths (R5) -------------------------------------------- */
+
+/* Does the measured OOF score satisfy the gate? */
 function gateVerdict(comp) {
   if (comp.reached === true) return "pass";
   if (comp.reached === false) return "fail";
@@ -95,7 +127,20 @@ function gapLooksLarge(comp) {
   return Number.isFinite(gap) && Number.isFinite(std) && Math.abs(gap) > 2 * std;
 }
 
-/* ---------- shared header/footer ------------------------------------------- */
+/* Attainment toward the target, in percent (100% = gate met). Clamped for the
+ * meter, unclamped for the label so overshooting scores still read as >100%. */
+function gateAttainment(comp) {
+  if (comp.cv_mean == null || comp.target_score == null) return null;
+  const cv = Number(comp.cv_mean);
+  const target = Number(comp.target_score);
+  if (!Number.isFinite(cv) || !Number.isFinite(target) || target === 0) return null;
+  const higher = comp.higher_is_better !== false;
+  const raw = (higher ? cv / target : target / cv) * 100;
+  if (!Number.isFinite(raw)) return null;
+  return { raw, clamped: Math.max(0, Math.min(100, raw)), verdict: gateVerdict(comp) };
+}
+
+/* ---------- shared header/footer ---------------------------------------------- */
 
 /* Mark the current page before the fetch, so navigation still works when the
  * dashboard cannot be loaded. */
@@ -109,31 +154,61 @@ function markActiveNav() {
 }
 
 function hydrateChrome(data) {
+  const gen = data.generated_at;
+  const fresh = freshness(gen);
   mount("head-meta",
-    `rulebook v${esc(data.rules_version ?? "—")} · generated ${esc(data.generated_at ?? "—")}`);
+    `rulebook v${esc(data.rules_version ?? "—")}` +
+    (gen ? ` · generated ${esc(gen)}` : "") +
+    (fresh ? ` · <span class="freshness ${fresh.cls}" title="dashboard generated ${esc(gen)}">${esc(fresh.text)}</span>` : ""));
   mount("foot-generated",
-    `dashboard generated ${esc(data.generated_at ?? "—")} by <code>python -m engine report</code>`);
+    (gen
+      ? `dashboard generated <time datetime="${esc(gen)}">${esc(gen)}</time> (${esc(ageLabel(gen))})`
+      : "dashboard generation time unknown") +
+    ` by <code>python -m engine report</code>`);
   const repo = data.repo_url || "#";
   document.querySelectorAll("[data-repo-link]").forEach((a) => {
     a.href = repo;
   });
 }
 
-/* ---------- pages ----------------------------------------------------------- */
+/* ---------- component: repo tree ------------------------------------------------ */
+
+/* The tree ships as plain <pre> text (readable without JS); this colours the
+ * directory paths, file paths and "<-" notes without touching the markup. */
+function decorateTree() {
+  const pre = document.getElementById("repo-tree");
+  if (!pre) return;
+  const raw = pre.textContent.replace(/\s+$/, "");
+  if (!raw) return;
+  pre.innerHTML = raw.split("\n").map((line) => {
+    const cut = line.indexOf("<-");
+    const left = cut === -1 ? line : line.slice(0, cut);
+    const note = cut === -1 ? "" : line.slice(cut);
+    const isDir = /\/\s*$/.test(left);
+    const leftHtml = isDir
+      ? `<span class="t-dir">${esc(left)}</span>`
+      : `<span class="t-path">${esc(left)}</span>`;
+    return leftHtml + (note ? `<span class="t-note">${esc(note)}</span>` : "");
+  }).join("\n") + "\n";
+}
+
+/* ---------- page: overview -------------------------------------------------------- */
 
 function renderIndex(data) {
   const stats = data.stats || {};
   const engine = data.engine || {};
+  decorateTree();
+
   const cards = [
-    ["Competitions tracked", stats.competitions ?? 0, `${stats.tracked_on_disk ?? 0} folder(s) on disk`],
-    ["Gate reached", stats.gate_reached ?? 0, `${stats.gate_defined ?? 0} with a score gate defined`],
-    ["Runs recorded", stats.runs ?? 0, "scout / code / train attempts"],
-    ["Solved", stats.solved ?? 0, "marked solved by the score gate"],
+    ["Competitions tracked", stats.competitions ?? 0, `${stats.tracked_on_disk ?? 0} folder(s) on disk`, ""],
+    ["Gate reached", stats.gate_reached ?? 0, `${stats.gate_defined ?? 0} with a score gate defined`, (stats.gate_reached ?? 0) > 0 ? "pass" : ""],
+    ["Runs recorded", stats.runs ?? 0, "scout / code / train attempts", (stats.runs ?? 0) > 0 ? "info" : ""],
+    ["Solved", stats.solved ?? 0, "marked solved by the score gate", (stats.solved ?? 0) > 0 ? "pass" : ""],
   ];
-  mount("stats", cards.map(([label, value, sub]) => `
+  mount("stats", cards.map(([label, value, sub, tone]) => `
     <div class="card">
       <div class="label">${esc(label)}</div>
-      <div class="value">${esc(value)}</div>
+      <div class="value${tone ? ` tone-${tone}` : ""}">${esc(value)}</div>
       <div class="sub">${esc(sub)}</div>
     </div>`).join(""));
 
@@ -159,9 +234,12 @@ function renderIndex(data) {
          <span class="k">phase</span><span class="v">${esc(last.phase)}</span>
          <span class="k">status</span><span class="v">${statusChip(last.status)}</span>
          <span class="k">finished</span><span class="v">${when(last.finished_at)}</span>
-       </div>`
+       </div>
+       <div class="panel-foot"><a href="competitions.html#recent-runs">all recorded runs →</a></div>`
     : '<div class="state">No runs yet — start one with <code>python -m engine cycle</code>.</div>');
 }
+
+/* ---------- page: competitions ------------------------------------------------------ */
 
 function compCard(comp) {
   const checks = ruleOrder(comp.checks);
@@ -172,6 +250,15 @@ function compCard(comp) {
   const gapTitle = gapLarge
     ? ' title="gap beyond 2x CV std — diagnose the split before adding models (R5)"'
     : "";
+
+  const passed = checks.filter((c) => c.status === "pass").length;
+  const anyFail = checks.some((c) => c.status === "fail");
+  const anyWarn = checks.some((c) => c.status === "warn");
+  const summaryTone = anyFail ? "fail" : anyWarn ? "warn" : checks.length ? "pass" : "na";
+  const summaryText = checks.length ? `${passed}/${checks.length} checks` : "no checks yet";
+
+  const attain = gateAttainment(comp);
+  const meterTone = attain ? (attain.verdict === "pass" ? "good" : attain.verdict === "fail" ? "bad" : "") : "";
 
   const links = [
     ["Kaggle", comp.url],
@@ -197,13 +284,49 @@ function compCard(comp) {
       <div><div class="k">gap (LB−OOF)</div><div class="v${gapClass}"${gapTitle}>${fmt(comp.gap)}</div></div>
       <div><div class="k">attempts</div><div class="v">${esc(comp.attempts ?? 0)}</div></div>
     </div>
-    <div class="checks-row">${checks.map((c) =>
-      `<span class="chip ${CHIP_CLASS[c.status] || "info"}" title="${esc(c.detail)}">${esc(c.rule)} ${esc(c.status)}</span>`
-    ).join("") || '<span class="chip na">no checks yet</span>'}</div>
+    ${attain ? `
+    <div class="gate">
+      <progress class="prog ${meterTone}" max="100" value="${attain.clamped.toFixed(1)}"
+                aria-label="OOF score progress toward the score gate"></progress>
+      <div class="gate-label">OOF ${fmt(comp.cv_mean)} vs gate ${fmt(comp.target_score)} — ${fmtPct(attain.raw)} of target</div>
+    </div>` : ""}
+    <div class="checks-row">
+      <span class="chip ${summaryTone} summary" title="rules checked and passing for this competition">${esc(summaryText)}</span>
+      ${checks.map((c) =>
+        `<span class="chip ${CHIP_CLASS[c.status] || "info"}" title="${esc(c.detail)}">${esc(c.rule)} ${esc(c.status)}</span>`
+      ).join("")}
+    </div>
     ${(comp.notes || []).map((n) => `<div class="note">⚠ ${esc(n)}</div>`).join("")}
     <div class="links">${links.map(([label, href]) =>
-      `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(label)}</a>`).join("")}</div>
+      `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(label)} <span aria-hidden="true">↗</span></a>`).join("")}</div>
   </div>`;
+}
+
+function runRow(r) {
+  return `
+        <tr>
+          <td>${esc(r.slug)}</td>
+          <td class="num">${esc(r.attempt)}</td>
+          <td>${esc(r.phase)}</td>
+          <td>${statusChip(r.status)}</td>
+          <td class="num">${fmt(r.cv_mean)}</td>
+          <td class="num">${fmt(r.lb_score)}</td>
+          <td>${r.score_reached === true ? chip("pass") : r.score_reached === false ? chip("fail") : chip("n/a")}</td>
+          <td class="num">${when(r.finished_at)}</td>
+        </tr>`;
+}
+
+function runTable(runs) {
+  return `
+    <div class="scroll-x">
+      <table class="data">
+        <thead><tr><th scope="col">competition</th><th scope="col">attempt</th>
+                   <th scope="col">phase</th><th scope="col">status</th>
+                   <th scope="col" class="num">OOF</th><th scope="col" class="num">LB</th>
+                   <th scope="col">gate</th><th scope="col">finished</th></tr></thead>
+        <tbody id="runs-body">${runs.slice(0, 25).map(runRow).join("")}</tbody>
+      </table>
+    </div>`;
 }
 
 function renderCompetitions(data) {
@@ -220,25 +343,52 @@ function renderCompetitions(data) {
       String(b.finished_at || "").localeCompare(String(a.finished_at || "")) ||
       (Number(b.attempt) || 0) - (Number(a.attempt) || 0));
 
-  mount("recent-runs", runs.length ? `
-    <table class="data">
-      <thead><tr><th scope="col">competition</th><th scope="col">attempt</th>
-                 <th scope="col">phase</th><th scope="col">status</th>
-                 <th scope="col" class="num">OOF</th><th scope="col" class="num">LB</th>
-                 <th scope="col">gate</th><th scope="col">finished</th></tr></thead>
-      <tbody>${runs.slice(0, 25).map((r) => `
-        <tr>
-          <td>${esc(r.slug)}</td>
-          <td class="num">${esc(r.attempt)}</td>
-          <td>${esc(r.phase)}</td>
-          <td>${statusChip(r.status)}</td>
-          <td class="num">${fmt(r.cv_mean)}</td>
-          <td class="num">${fmt(r.lb_score)}</td>
-          <td>${r.score_reached === true ? chip("pass") : r.score_reached === false ? chip("fail") : chip("n/a")}</td>
-          <td class="num">${when(r.finished_at)}</td>
-        </tr>`).join("")}</tbody>
-    </table>` : '<div class="state">No runs recorded yet.</div>');
+  if (!runs.length) {
+    mount("recent-runs", '<div class="state">No runs recorded yet.</div>');
+    return;
+  }
+
+  const statuses = [...new Set(runs.map((r) => r.status).filter(Boolean))].sort();
+
+  mount("recent-runs", `
+    <div class="toolbar">
+      <input id="runs-filter" type="search" placeholder="filter by competition, phase or status…"
+             aria-label="Filter runs" autocomplete="off">
+      <select id="runs-status" aria-label="Filter runs by status">
+        <option value="">all statuses</option>
+        ${statuses.map((s) => `<option value="${esc(s)}">${esc(s)}</option>`).join("")}
+      </select>
+      <span class="filter-count" id="runs-count"></span>
+    </div>
+    ${runTable(runs)}`);
+
+  const input = document.getElementById("runs-filter");
+  const select = document.getElementById("runs-status");
+  const body = document.getElementById("runs-body");
+  const count = document.getElementById("runs-count");
+  if (!input || !select || !body || !count) return;
+
+  const apply = () => {
+    const q = input.value.trim().toLowerCase();
+    const st = select.value;
+    const filtered = runs.filter((r) =>
+      (!st || String(r.status ?? "") === st) &&
+      (!q || `${r.slug} ${r.phase} ${r.status} ${r.attempt}`.toLowerCase().includes(q)));
+    body.innerHTML = filtered.length
+      ? filtered.slice(0, 25).map(runRow).join("")
+      : '<tr><td colspan="8" class="evidence">no runs match the current filter.</td></tr>';
+    const shown = Math.min(25, filtered.length);
+    count.textContent = filtered.length === runs.length
+      ? `${runs.length} run${runs.length === 1 ? "" : "s"}`
+      : `showing ${shown} of ${filtered.length} (${runs.length} total)`;
+  };
+
+  input.addEventListener("input", apply);
+  select.addEventListener("change", apply);
+  apply();
 }
+
+/* ---------- page: requirements matrix ------------------------------------------------ */
 
 function renderRequirements(data) {
   const comps = data.competitions || [];
@@ -256,6 +406,12 @@ function renderRequirements(data) {
     });
   });
 
+  const totals = comps.map((c) => {
+    const checks = c.checks || [];
+    const pass = checks.filter((x) => x.status === "pass").length;
+    return `<td class="num">${pass}/${checks.length}</td>`;
+  }).join("");
+
   mount("matrix", `
     <table class="data">
       <thead><tr><th scope="col">rule</th><th scope="col">requirement</th>
@@ -266,21 +422,40 @@ function renderRequirements(data) {
           <td>${esc(r.title)}</td>
           ${comps.map((c) => {
             const check = byRule[r.id] && byRule[r.id][c.slug];
-            return `<td>${check ? chip(check.status) : chip("n/a")}</td>`;
+            return check
+              ? `<td><a class="chip ${CHIP_CLASS[check.status] || "info"}" href="#ev-${esc(c.slug)}-${esc(check.rule)}" title="${esc(check.detail)}">${esc(check.status)}</a></td>`
+              : `<td>${chip("n/a")}</td>`;
           }).join("")}
         </tr>`).join("")}</tbody>
+      <tfoot><tr class="sum">
+        <td class="mono">Σ</td><td>checks passing</td>${totals}
+      </tr></tfoot>
     </table>`);
 
-  mount("details", comps.map((c) => `
+  mount("details", comps.map((c) => {
+    const checks = ruleOrder(c.checks);
+    const pass = checks.filter((x) => x.status === "pass").length;
+    const fail = checks.filter((x) => x.status === "fail").length;
+    const warn = checks.filter((x) => x.status === "warn").length;
+    const pct = checks.length ? (pass / checks.length) * 100 : 0;
+    const tone = fail ? "bad" : checks.length && pass === checks.length ? "good" : "";
+    const checksChip = c.checks_passed === true ? chip("pass")
+      : c.checks_passed === false ? chip("fail") : chip("na");
+
+    return `
     <div class="panel">
-      <h3>${esc(c.title)} <span class="mono faint">${esc(c.slug)}</span>
-        ${c.checks_passed === true ? chip("pass") : c.checks_passed === false ? chip("fail") : chip("na")}</h3>
+      <div class="detail-head">
+        <h3>${esc(c.title)} <span class="mono faint">${esc(c.slug)}</span> ${checksChip}</h3>
+        <span class="gate-label">${pass}/${checks.length} passing${warn ? ` · ${warn} warn` : ""}${fail ? ` · ${fail} fail` : ""}</span>
+      </div>
+      <progress class="prog ${tone}" max="100" value="${pct.toFixed(1)}"
+                aria-label="Share of requirement checks passing for ${esc(c.slug)}"></progress>
       <div class="scroll-x">
         <table class="data">
           <thead><tr><th scope="col">rule</th><th scope="col">requirement</th>
                      <th scope="col">status</th><th scope="col">evidence</th></tr></thead>
-          <tbody>${ruleOrder(c.checks).map((check) => `
-            <tr>
+          <tbody>${checks.map((check) => `
+            <tr id="ev-${esc(c.slug)}-${esc(check.rule)}">
               <td class="mono">${esc(check.rule)}</td>
               <td>${esc(check.title)}</td>
               <td>${chip(check.status)}</td>
@@ -288,15 +463,28 @@ function renderRequirements(data) {
             </tr>`).join("") || '<tr><td colspan="4" class="evidence">no checks recorded</td></tr>'}</tbody>
         </table>
       </div>
-    </div>`).join(""));
+    </div>`;
+  }).join(""));
 }
 
+/* ---------- page: rulebook -------------------------------------------------------------- */
+
 function renderRules(data) {
-  mount("rules", (data.requirements || []).map((r) => `
-    <div class="rule">
-      <span class="rid">${esc(r.id)}</span><span class="rtitle">${esc(r.title)}</span>
+  const rules = data.requirements || [];
+
+  mount("rules", rules.length ? `
+    <nav class="rule-index" aria-label="Jump to rule">
+      ${rules.map((r) => `<a class="chip info" href="#rule-${esc(r.id)}" title="${esc(r.title)}">${esc(r.id)}</a>`).join("")}
+    </nav>
+    ${rules.map((r) => `
+    <article class="rule" id="rule-${esc(r.id)}">
+      <div class="rule-head">
+        <span class="rid">${esc(r.id)}</span><span class="rtitle">${esc(r.title)}</span>
+        <button class="btn-copy" type="button" data-copy-rule aria-label="Copy rule ${esc(r.id)} text">copy</button>
+      </div>
       <p>${esc(r.text)}</p>
-    </div>`).join(""));
+    </article>`).join("")}`
+    : '<div class="state">No rulebook loaded — regenerate <code>data/dashboard.json</code>.</div>');
 
   const engine = data.engine || {};
   mount("engine-rules", `
@@ -309,7 +497,47 @@ function renderRules(data) {
     </div>`);
 }
 
-/* ---------- boot -------------------------------------------------------------- */
+/* ---------- component: copy rule text ---------------------------------------------------- */
+
+function flashLabel(btn, text) {
+  const old = btn.textContent;
+  btn.textContent = text;
+  btn.classList.add("ok");
+  setTimeout(() => {
+    btn.textContent = old;
+    btn.classList.remove("ok");
+  }, 1500);
+}
+
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise((resolve, reject) => {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.className = "offscreen";
+    ta.setAttribute("readonly", "");
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch { ok = false; }
+    ta.remove();
+    ok ? resolve() : reject(new Error("copy failed"));
+  });
+}
+
+document.addEventListener("click", (e) => {
+  const btn = e.target && e.target.closest ? e.target.closest("[data-copy-rule]") : null;
+  if (!btn) return;
+  const text = btn.closest(".rule") ? btn.closest(".rule").querySelector("p").textContent.trim() : "";
+  if (!text) return;
+  copyText(text)
+    .then(() => flashLabel(btn, "copied ✓"))
+    .catch(() => flashLabel(btn, "copy failed"));
+});
+
+/* ---------- boot ---------------------------------------------------------------------------- */
 
 function mountRoot(html) {
   const root = document.getElementById("root");
@@ -319,7 +547,7 @@ function mountRoot(html) {
 
 async function boot() {
   markActiveNav();
-  mountRoot('<div class="state">Loading <code>data/dashboard.json</code>…</div>');
+  mountRoot(SKELETON);
 
   let data;
   try {

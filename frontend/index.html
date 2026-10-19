@@ -51,6 +51,10 @@
       GitHub Actions), and a run only counts when the out-of-fold score is measured,
       recorded and matched against the gate.
     </p>
+    <div class="hero-actions">
+      <a class="btn primary" href="competitions.html">Browse competitions</a>
+      <a class="btn" href="rules.html">Read the rulebook</a>
+    </div>
   </section>
 
   <div class="cards" id="stats"></div>
@@ -72,7 +76,7 @@
 
   <h2 class="section-title">Where everything lives</h2>
   <div class="panel">
-<pre class="mono tree">
+<pre class="mono tree" id="repo-tree">
 Kaggle-solutionsvsdatasets/
 ├── engine/                     <- scout + coder + pipeline (python -m engine …)
 │   ├── rules.py                <- the rulebook (R1–R13) injected into every coder prompt
@@ -99,7 +103,10 @@ Kaggle-solutionsvsdatasets/
 <footer class="site">
   <div class="wrap foot-inner">
     <span id="foot-generated"></span>
-    <a data-repo-link href="#">source on GitHub</a>
+    <span class="foot-links">
+      <a data-repo-link href="#">source on GitHub</a>
+      <a class="to-top" href="#main">back to top ↑</a>
+    </span>
   </div>
 </footer>
 
