@@ -1,0 +1,54 @@
+# Everything except the static dashboard is excluded from Vercel uploads.
+# Deliberately negation-free: the previous whitelist attempt used !re-include
+# rules and Vercel's matcher silently kept only 1 file (build served 404),
+# so this file lists exclusions only — no `!` rules anywhere.
+#
+# Note: Vercel does NOT read .gitignore (the legacy NTG/ folder, 922 MB,
+# was being uploaded until this file existed) — this file is the only gate.
+
+# Engine source and local state (server code, SQLite history)
+/engine/
+/.engine/
+/*.py
+
+# Competition material: notebooks aside, data and run artifacts never ship
+/competition/
+/NTG/
+
+# Repo plumbing
+/.github/
+/.git/
+/.vercel/
+/.gitignore
+/.env
+/.env.*
+/requirements.txt
+/readme.md
+
+# Data-format catch-alls (mirrors .gitignore, since Vercel ignores it)
+*.csv
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.parquet
+*.feather
+*.arrow
+*.hdf5
+*.h5
+*.joblib
+*.pkl
+*.pickle
+*.onnx
+*.pt
+*.pth
+*.cbm
+*.bin
+*.safetensors
+
+# Secrets (belt and braces; they should never be here in the first place)
+kaggle.json
+credentials*.json
+*.pem
+*.key

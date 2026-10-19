@@ -277,8 +277,18 @@ Static, no build step (`frontend/`):
 
 Data source: `frontend/data/dashboard.json`, written by
 `python -m engine report` (and by the daily CI cycle). Serve locally with any
-static server, e.g. `python -m http.server -d frontend`, or enable GitHub Pages
-on `/frontend`.
+static server, e.g. `python -m http.server -d frontend`.
+
+**Live:** <https://kaggle-solutions-dashboard.vercel.app> — deployed with the
+Vercel CLI from the repo root. `vercel.json` pins `outputDirectory: frontend`
+and `framework: null`, and `.vercelignore` excludes everything except the
+dashboard (Vercel does **not** read `.gitignore`, so the engine, the
+`NTG/` legacy folder and all competition data are explicitly blocked from ever
+uploading). Redeploy after `python -m engine report` with:
+
+```powershell
+vercel deploy --prod --yes
+```
 
 ---
 
