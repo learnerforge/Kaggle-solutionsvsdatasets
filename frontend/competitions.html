@@ -3,16 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0a0e13">
   <title>Competitions — Kaggle Solutions vs Datasets</title>
   <meta name="description" content="Every tracked competition: OOF score, gate status, leaderboard gap and requirement checks.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23a3e635'/%3E%3Ctext x='16' y='16' font-family='monospace' font-size='20' font-weight='bold' text-anchor='middle' dominant-baseline='central' fill='%230a0e13'%3EK%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body data-page="competitions">
 
+<a class="skip" href="#main">Skip to content</a>
+
 <header class="site">
   <div class="head-inner">
     <div class="brand"><span class="glyph">K</span> Kaggle Solutions vs Datasets</div>
-    <nav class="site">
+    <nav class="site" aria-label="Primary">
       <a data-nav="index" href="index.html">Overview</a>
       <a data-nav="competitions" href="competitions.html">Competitions</a>
       <a data-nav="requirements" href="requirements.html">Requirements</a>
@@ -22,7 +27,15 @@
   </div>
 </header>
 
-<main class="wrap">
+<main class="wrap" id="main">
+
+  <div id="root" role="status"></div>
+  <noscript>
+    <div class="state error">
+      This dashboard renders <code>data/dashboard.json</code> with JavaScript —
+      please enable it, or read the JSON directly.
+    </div>
+  </noscript>
 
   <section class="hero">
     <h1>Competitions</h1>
@@ -41,14 +54,14 @@
   <h2 class="section-title">Recent runs</h2>
   <div class="panel scroll-x" id="recent-runs"></div>
 
-  <footer class="site">
-    <div class="wrap" style="padding-bottom:0;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border:none;">
-      <span id="foot-generated"></span>
-      <a data-repo-link href="#">source on GitHub</a>
-    </div>
-  </footer>
-
 </main>
+
+<footer class="site">
+  <div class="wrap foot-inner">
+    <span id="foot-generated"></span>
+    <a data-repo-link href="#">source on GitHub</a>
+  </div>
+</footer>
 
 <script src="assets/app.js"></script>
 </body>
