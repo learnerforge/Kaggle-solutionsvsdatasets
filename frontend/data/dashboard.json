@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T10:56:49+00:00",
+  "generated_at": "2026-10-19T11:35:27+00:00",
   "rules_version": "1.1.0",
   "repo_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets",
   "engine": {
@@ -13,13 +13,13 @@
   },
   "stats": {
     "competitions": 3,
-    "runs": 3,
+    "runs": 6,
     "solved": 0,
     "last_run": {
-      "slug": "playground-series-s6e2",
+      "slug": "nlp-getting-started",
       "phase": "code",
       "status": "dry_run",
-      "finished_at": "2026-10-19T07:19:24+00:00"
+      "finished_at": "2026-10-19T11:35:27+00:00"
     },
     "gate_reached": 0,
     "tracked_on_disk": 3,
@@ -124,8 +124,8 @@
         "train/metrics.json missing \u2014 nothing measured yet (rule R4)"
       ],
       "status": "registered",
-      "attempts": 0,
-      "last_attempt_at": null,
+      "attempts": 3,
+      "last_attempt_at": "2026-10-19T11:35:27+00:00",
       "readme_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/readme.md",
       "notebook_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/code/nlp-getting-started.ipynb",
       "problem_statement_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/PROBLEM_STATEMENT.md",
@@ -182,7 +182,38 @@
       ],
       "checks_failed": [],
       "checks_passed": true,
-      "history": []
+      "history": [
+        {
+          "attempt": 3,
+          "phase": "code",
+          "status": "dry_run",
+          "cv_mean": null,
+          "lb_score": null,
+          "score_reached": null,
+          "finished_at": "2026-10-19T11:35:27+00:00",
+          "notes": "dry-run: opencode not invoked"
+        },
+        {
+          "attempt": 2,
+          "phase": "code",
+          "status": "dry_run",
+          "cv_mean": null,
+          "lb_score": null,
+          "score_reached": null,
+          "finished_at": "2026-10-19T11:35:27+00:00",
+          "notes": "dry-run: opencode not invoked"
+        },
+        {
+          "attempt": 1,
+          "phase": "code",
+          "status": "dry_run",
+          "cv_mean": null,
+          "lb_score": null,
+          "score_reached": null,
+          "finished_at": "2026-10-19T11:35:27+00:00",
+          "notes": "dry-run: opencode not invoked"
+        }
+      ]
     },
     {
       "slug": "playground-series-s6e2",

@@ -27,7 +27,7 @@ from .settings import Settings, load
 @dataclass
 class CycleOutcome:
     slug: str
-    status: str                   # solved | not_reached | error | dry_run | no_work
+    status: str                   # solved | not_reached | error | dry_run | no_work | blocked | scaffolded
     attempts: int = 0
     report: dict | None = None
     checks: dict | None = None
@@ -102,6 +102,7 @@ def run_cycle(slug: str | None = None, *, download: bool = True, refresh: bool =
               max_attempts: int | None = None, target_score: float | None = None,
               title: str | None = None, metric: str | None = None,
               target: str | None = None, dry_run: bool = False,
+              wait_join: int = 0,
               settings: Settings | None = None) -> CycleOutcome:
     settings = settings or load()
     max_attempts = max_attempts or settings.max_attempts
@@ -119,7 +120,7 @@ def run_cycle(slug: str | None = None, *, download: bool = True, refresh: bool =
                     target_score=target_score, settings=settings)
     brief_obj = scout_mod.scout(slug, download=download, refresh=refresh, title=title,
                                 target=target, metric=metric, target_score=target_score,
-                                settings=settings)
+                                wait_join=wait_join, settings=settings)
     brief = brief_obj.as_dict()
     for warning in brief_obj.warnings:
         _log(outcome, f"warning: {warning}")
@@ -133,6 +134,21 @@ def run_cycle(slug: str | None = None, *, download: bool = True, refresh: bool =
             _log(outcome, f"attempt {attempt}: prompt written to {run['prompt_path']}")
         outcome.status = "dry_run"
         outcome.attempts = max_attempts
+        report_mod.write_dashboard(settings)
+        return outcome
+
+    # --- guard: never burn coder attempts without data ----------------------
+    # A notebook that cannot read ../datasets/ can only fail, so the cycle
+    # stops here with an actionable message instead of producing a failed run.
+    datasets_dir = settings.datasets_dir(slug)
+    has_data = (any(datasets_dir.glob("*.csv")) or any(datasets_dir.glob("*.parquet"))
+                or any(datasets_dir.glob("*.json")) or any(datasets_dir.glob("*.txt")))
+    if do_execute and not has_data:
+        outcome.status = "blocked"
+        _log(outcome, f"blocked: no datasets under competition/{slug}/datasets/")
+        _log(outcome, "the rules must be accepted in the browser first (no CLI "
+                      "equivalent): https://www.kaggle.com/competitions/" + slug)
+        _log(outcome, "re-run afterwards, or pass --wait N to let the cycle poll for the join")
         report_mod.write_dashboard(settings)
         return outcome
 

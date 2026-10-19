@@ -22,6 +22,92 @@ from . import rules
 from .settings import Settings
 
 
+# --------------------------------------------------------------------------- #
+# metric playbooks — concrete algorithm ladders per scoring metric
+# --------------------------------------------------------------------------- #
+
+_METRIC_PLAYBOOKS: list[tuple[tuple[str, ...], str]] = [
+    (("rmse", "mse", "mae", "rmsle"),
+     "* Baseline first: median/most-frequent prediction, then regularised linear "
+     "model (Ridge/ElasticNet) on one-hot or ordinal encoding — that number is "
+     "your honesty anchor (R7).\n"
+     "* Skewed target (check `profiles` in the brief): model `log1p(y)` and "
+     "expm1 back — for RMSE-on-price-style targets this alone often beats a "
+     "model upgrade. Report the metric on the original scale (R5).\n"
+     "* Gradient boosting ladder: LightGBM -> XGBoost -> CatBoost (CatBoost for "
+     "high-cardinality categoricals without manual encoding). Keep folds, SEED "
+     "and features identical across the zoo so the comparison is fair.\n"
+     "* Blend only with OOF evidence: fit each member on the same K folds, "
+     "average predictions by a weight chosen on OOF (start 50/50 or 60/40), "
+     "and keep the blend's OOF score — never a test-set-tuned weight.\n"
+     "* Watch the CV-vs-gate gap before adding capacity: duplicated rows, a "
+     "leaky column, or a fold mismatch (R6) distorts RMSE more than any model choice."),
+    (("f1",),
+     "* Text or binary-classification F1: start with TF-IDF (word 1-2 grams + "
+     "char 3-5 grams) -> LogisticRegression / LinearSVC. This baseline is "
+     "strong and trains in seconds; measure it before any neural model.\n"
+     "* F1 depends on the decision threshold, not just the model: choose the "
+     "threshold that maximises F1 **on OOF predictions only** (grid ~0.20-0.80 "
+     "in 0.01 steps), then freeze it for the test set. Never tune on test.\n"
+     "* Stratified folds (R6) so every fold carries both classes; verify each "
+     "fold's positive rate in the brief's target profile.\n"
+     "* Model ladder after the linear baseline: fine-tuned compact transformer "
+     "(if GPU/time allows) or stacked TF-IDF + LightGBM on the same OOF; any "
+     "ensemble must be decided on OOF F1, not test predictions.\n"
+     "* Output must match `sample_submission.csv` exactly: same row order, "
+     "same `id` values, integer 0/1 predictions."),
+    (("roc_auc", "auc"),
+     "* ROC AUC only needs correct ordering, not calibrated probabilities and "
+     "not any threshold: never round or threshold the predictions before scoring.\n"
+     "* Baseline: LightGBM/XGBoost with conservative defaults; then feature "
+     "work (target encoding fold-safe, interaction features) usually beats "
+     "hyperparameter sweeps at this metric.\n"
+     "* Aggregated/mean-shifted features and time-safe joins matter: check the "
+     "brief's numeric drift and only-train/only-test columns before adding them.\n"
+     "* Ensemble: rank-average or mean-blend member models on OOF AUC; report "
+     "the blended OOF, not the best single test submission."),
+    (("log_loss",),
+     "* Log loss rewards well-calibrated probabilities: prefer models with "
+     "native probability output; if blending, average **probabilities** (not "
+     "labels) and verify calibration on OOF.\n"
+     "* Guard against confident errors: clip predicted probabilities to "
+     "[1e-5, 1-1e-5] and confirm class order matches the sample submission.\n"
+     "* Use stratified folds; a fold missing a class explodes the loss (R6)."),
+    (("accuracy", "balanced_accuracy"),
+     "* Stratified folds and a per-fold metric print are mandatory — with "
+     "imbalanced classes accuracy hides failure (check the target profile).\n"
+     "* Choose the decision threshold on OOF (maximise the metric or move it "
+     "toward balanced accuracy), freeze it, then apply to test.\n"
+     "* Ladder: regularised linear baseline -> LightGBM/XGBoost -> OOF blend."),
+    (("quadratic_weighted_kappa",),
+     "* QWK needs integer-ish predictions: model as regression (or ordinal) and "
+     "round/clamp to the allowed label range before computing the metric.\n"
+     "* The known QWK trick: start from your model's OOF predictions and search "
+     "an order-preserving mapping (thresholds) that maximises QWK **on OOF**, "
+     "then apply the frozen mapping to test.\n"
+     "* Keep folds identical across variants — QWK is sensitive to fold "
+     "composition with few distinct labels."),
+]
+
+_GENERIC_PLAYBOOK = (
+    "* Establish a measured, leak-free baseline on fixed folds first (R7 steps 1-3); "
+    "an unmeasured model is not a result (R4).\n"
+    "* Then climb the ladder: regularised linear model -> LightGBM/XGBoost/CatBoost -> "
+    "OOF-fitted blend, changing one variable per attempt so every score delta is attributable.\n"
+    "* All tuning decisions are made on OOF predictions only; test predictions are "
+    "produced once, by the frozen pipeline (R6)."
+)
+
+
+def metric_playbook(metric: str | None) -> str:
+    """Concrete algorithm ladder for the competition's metric (prompt depth)."""
+    low = (metric or "").lower().strip()
+    for family, text in _METRIC_PLAYBOOKS:
+        if low in family:
+            return text
+    return _GENERIC_PLAYBOOK
+
+
 def coder_system_prompt() -> str:
     return (
         "You are the coding agent of the Kaggle engine. You write competition "
@@ -106,6 +192,13 @@ def coder_task_prompt(
         "OOF-fitted ensemble, fold-safe target encoding, pseudo-labelling, bounded search.",
         "* Prefer more evidence over more models: if the CV-vs-gate gap is unexplained, "
         "fix the measurement before adding capacity (R5).",
+    ]
+    metric = (brief or {}).get("metric")
+    parts += [
+        "",
+        f"## Algorithm playbook — metric `{metric or 'unknown'}`",
+        "",
+        metric_playbook(metric),
     ]
     if feedback:
         parts += [

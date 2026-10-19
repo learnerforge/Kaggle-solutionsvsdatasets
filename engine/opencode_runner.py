@@ -17,6 +17,13 @@ Notes that matter in practice:
 * Output parsing is defensive: the CLI's JSON event schema is not contractual,
   so the runner extracts the longest plausible assistant text and always keeps
   the raw transcript on disk.
+* The transcript is **streamed to disk line by line** while the process runs,
+  so a timeout, a kill or a crash still leaves the full partial conversation
+  for the next attempt to learn from. A heartbeat line is printed every 30s so
+  long coder turns never look hung.
+* Transient failures (non-zero exit, empty response) are retried once by
+  default (``ENGINE_OPENCODE_RETRIES``); timeouts are never retried — they
+  would only double the wall-clock cost of a genuinely slow turn.
 """
 
 from __future__ import annotations
@@ -25,6 +32,7 @@ import json
 import os
 import shutil
 import subprocess
+import threading
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -99,6 +107,83 @@ def _extract_text(raw: str) -> tuple[str, str | None]:
     return raw.strip(), session_id
 
 
+def _invoke(cmd: list[str], *, timeout: int, log, label: str,
+            cwd: Path) -> tuple[int | None, str, str | None, float, str | None, bool]:
+    """Run one opencode process with a streamed transcript.
+
+    Returns ``(returncode, text, session_id, duration, error, timed_out)``.
+    On timeout the process is killed but everything already streamed to ``log``
+    (and to the collected lines) is kept — partial transcripts are the whole
+    point of streaming.
+    """
+    started = time.time()
+    deadline = started + timeout
+    log.write(f"----- TRY cmd: {' '.join(cmd)} -----\n")
+    log.flush()
+
+    try:
+        proc = subprocess.Popen(
+            cmd, cwd=str(cwd), stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, encoding="utf-8", errors="replace", env=dict(os.environ),
+        )
+    except OSError as exc:  # pragma: no cover - platform dependent
+        return None, "", None, 0.0, f"failed to launch opencode: {exc}", False
+
+    out_lines: list[str] = []
+    err_lines: list[str] = []
+
+    def drain(pipe, sink: list[str], prefix: str = "") -> None:
+        try:
+            for line in pipe:
+                sink.append(line)
+                log.write(prefix + line)
+                log.flush()
+        except (ValueError, OSError):  # pragma: no cover - pipe closed under us
+            pass
+
+    threads = [
+        threading.Thread(target=drain, args=(proc.stdout, out_lines), daemon=True),
+        threading.Thread(target=drain, args=(proc.stderr, err_lines, "[stderr] "), daemon=True),
+    ]
+    for thread in threads:
+        thread.start()
+
+    timed_out = False
+    next_beat = started + 30
+    while proc.poll() is None:
+        now = time.time()
+        if now >= deadline:
+            timed_out = True
+            proc.kill()
+            break
+        if now >= next_beat:
+            print(f"[opencode] {label} running ({now - started:.0f}s / {timeout}s)",
+                  flush=True)
+            next_beat = now + 30
+        time.sleep(0.5)
+
+    try:
+        proc.wait(timeout=30)
+    except subprocess.TimeoutExpired:  # pragma: no cover - defensive
+        proc.kill()
+    for thread in threads:
+        thread.join(timeout=10)
+
+    duration = time.time() - started
+    text, session_id = _extract_text("".join(out_lines))
+    returncode = proc.returncode
+
+    if timed_out:
+        error = (f"opencode exceeded ENGINE_OPENCODE_TIMEOUT ({timeout}s); "
+                 "partial transcript kept")
+    elif returncode != 0 or not text.strip():
+        error = ("".join(err_lines).strip()[:2000]
+                 or f"opencode exited {returncode} with an empty response")
+    else:
+        error = None
+    return returncode, text, session_id, duration, error, timed_out
+
+
 def run(
     message: str,
     *,
@@ -130,44 +215,46 @@ def run(
         cmd += ["--file", str(prompt_path)]
     cmd.append(message)
 
-    started = time.time()
     if not available() and not shutil.which("opencode"):
         error = ("opencode CLI not found on PATH. Install it (npm i -g opencode-ai) or "
                  "run the engine with --dry-run to inspect prompts without invoking the coder.")
         log_path.write_text(f"# opencode unavailable\n{error}\n", encoding="utf-8")
         return OpenCodeResult(False, None, "", None, log_path, prompt_path, 0.0, error)
 
-    try:
-        proc = subprocess.run(
-            cmd, cwd=str(settings.repo_root), capture_output=True, text=True,
-            encoding="utf-8", errors="replace", timeout=timeout, env=dict(os.environ),
-        )
-        duration = time.time() - started
-        text, session_id = _extract_text(proc.stdout or "")
-        log_path.write_text(
-            "# opencode transcript\n"
-            f"# slug={slug} attempt={attempt} returncode={proc.returncode} duration={duration:.1f}s\n"
-            f"# prompt={prompt_path}\n\n"
-            f"----- PROMPT -----\n{_read(prompt_path)}\n\n"
-            f"----- STDOUT -----\n{proc.stdout or ''}\n\n"
-            f"----- STDERR -----\n{proc.stderr or ''}\n",
-            encoding="utf-8",
-        )
-        ok = proc.returncode == 0 and bool(text.strip())
-        error = None if ok else (proc.stderr or "").strip()[:2000] or "empty response"
-        return OpenCodeResult(ok, proc.returncode, text, session_id, log_path,
-                              prompt_path, duration, error)
-    except subprocess.TimeoutExpired:
-        duration = time.time() - started
-        error = f"opencode exceeded ENGINE_OPENCODE_TIMEOUT ({timeout}s)"
-        log_path.write_text(
-            f"# opencode timeout after {duration:.0f}s\n# prompt={prompt_path}\n\n{_read(prompt_path)}",
-            encoding="utf-8",
-        )
-        return OpenCodeResult(False, None, "", None, log_path, prompt_path, duration, error)
-    except OSError as exc:  # pragma: no cover - platform dependent
-        return OpenCodeResult(False, None, "", None, log_path, prompt_path,
-                              time.time() - started, f"failed to launch opencode: {exc}")
+    tries = 1 + max(0, int(getattr(settings, "opencode_retries", 0)))
+    label = f"{slug} attempt {attempt}"
+    returncode: int | None = None
+    text = ""
+    session_id: str | None = None
+    error: str | None = None
+    timed_out = False
+    total_duration = 0.0
+
+    with log_path.open("w", encoding="utf-8") as log:
+        log.write("# opencode transcript\n"
+                  f"# slug={slug} attempt={attempt} prompt={prompt_path}\n\n"
+                  f"----- PROMPT -----\n{_read(prompt_path)}\n\n")
+        log.flush()
+        for try_no in range(1, tries + 1):
+            if try_no > 1:
+                log.write(f"\n----- RETRY {try_no}/{tries} (previous: {error}) -----\n\n")
+                log.flush()
+                print(f"[opencode] {label}: retrying after failure — {error}", flush=True)
+            (returncode, text, session_id, duration, error, timed_out) = _invoke(
+                cmd, timeout=timeout, log=log, label=label, cwd=settings.repo_root,
+            )
+            total_duration += duration
+            ok = returncode == 0 and bool(text.strip()) and not timed_out
+            # Retry only transient failures; timeouts would cost the full
+            # budget again, so they break out immediately.
+            if ok or timed_out or try_no == tries:
+                break
+
+    ok = returncode == 0 and bool(text.strip()) and not timed_out
+    if not ok and not timed_out and tries > 1:
+        error = f"{error} (after {tries} tries)"
+    return OpenCodeResult(ok, returncode, text, session_id, log_path,
+                          prompt_path, total_duration, error)
 
 
 def _read(path: Path | None) -> str:

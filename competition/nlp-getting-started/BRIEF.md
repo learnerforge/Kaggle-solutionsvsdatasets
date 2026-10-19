@@ -5,7 +5,7 @@
 * Detected metric: `f1` (higher is better)
 * Target column: `target`
 * Score gate: `0.75`
-* Gathered: 2026-10-19T10:55:53+00:00
+* Gathered: 2026-10-19T11:35:27+00:00
 
 ## Files
 
@@ -19,7 +19,17 @@
 
 _No CSVs found._
 
+## Warnings
+
+* Dataset download failed: `kaggle competitions download nlp-getting-started --path` failed (exit 1): 403 Client Error: Forbidden for url: https://api.kaggle.com/v1/competitions.CompetitionApiService/DownloadDataFiles
+Hint: the competition rules are not accepted for this account. Join/accept in the browser at https://www.kaggle.com/competitions/nlp-getting-started — no CLI command can do this (the API token alone is not enough). Then re-run; `scout`/`cycle --wait N` will poll for the join automatically.
+
 ## Problem statement
+
+# Problem statement — NLP with Disaster Tweets
+
+> Fetched from Kaggle on 2026-10-19 10:55 UTC.
+> Kaggle: https://www.kaggle.com/competitions/nlp-getting-started
 
 ## Description
 

@@ -6,6 +6,7 @@ One verb set for the whole lifecycle:
     status    cycle statistics and the last runs
     init      create the folder contract + baseline notebook + README
     scout     fetch problem statement, files, datasets and profile them
+    files     list competition files remote/local, fetch one file by name
     prompt    print the exact prompt the coder would receive (no OpenCode call)
     code      trigger OpenCode to write/repair the notebook
     train     execute the notebook and keep the artifacts
@@ -28,6 +29,7 @@ from pathlib import Path
 from typing import Any
 
 from . import notebook_runner, orchestrator, prompts, report as report_mod, rules, scorer, scout as scout_mod, store, validate, vercel_sync
+from .kaggle_client import KaggleCLIError, KaggleClient
 from .settings import load
 
 
@@ -107,11 +109,20 @@ def cmd_init(args: argparse.Namespace) -> int:
     return _emit(payload, args.json, human)
 
 
+def _fmt_bytes(size: float) -> str:
+    value = float(size)
+    for unit in ("B", "KB", "MB", "GB"):
+        if value < 1024 or unit == "GB":
+            return f"{value:.0f} {unit}" if unit == "B" else f"{value:.1f} {unit}"
+        value /= 1024
+    return f"{value:.1f} GB"  # pragma: no cover
+
+
 def cmd_scout(args: argparse.Namespace) -> int:
     settings = load()
     brief = scout_mod.scout(
         args.slug, download=not args.no_download, refresh=args.refresh,
-        title=args.title, target=args.target, metric=args.metric,
+        wait_join=args.wait, title=args.title, target=args.target, metric=args.metric,
         target_score=args.target_score, settings=settings,
     )
     human = "\n".join([
@@ -123,7 +134,62 @@ def cmd_scout(args: argparse.Namespace) -> int:
         f"  brief       : competition/{brief.slug}/BRIEF.md",
         f"  statement   : competition/{brief.slug}/PROBLEM_STATEMENT.md",
     ] + ([f"  warnings    : {len(brief.warnings)}"] if brief.warnings else []))
+    if brief.files:
+        total = sum(int(f.get("totalBytes") or f.get("total_bytes") or f.get("size") or 0)
+                    for f in brief.files)
+        human += f"\n  remote size : {_fmt_bytes(total)}"
     return _emit(brief.as_dict(), args.json, human)
+
+
+def cmd_files(args: argparse.Namespace) -> int:
+    """Remote list / local list / single-file fetch (Kaggle CLI steps 2, 5, 6)."""
+    settings = load()
+    datasets_dir = settings.datasets_dir(args.slug)
+
+    if args.fetch:
+        try:
+            path = KaggleClient(settings).download_file(args.slug, args.fetch, datasets_dir)
+        except KaggleCLIError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+        payload = {"slug": args.slug, "fetched": args.fetch, "path": str(path)}
+        return _emit(payload, args.json,
+                     f"fetched {args.fetch} -> {path}")
+
+    if args.local:
+        rows = [{"name": str(p.relative_to(datasets_dir)), "size": p.stat().st_size}
+                for p in sorted(datasets_dir.rglob("*"))
+                if p.is_file() and p.name != ".gitkeep"]
+        total = sum(row["size"] for row in rows)
+        payload = {"slug": args.slug, "dir": str(datasets_dir), "count": len(rows),
+                   "total_bytes": total, "files": rows}
+        if args.json:
+            return _emit(payload, True)
+        if not rows:
+            print(f"no local files under competition/{args.slug}/datasets/ "
+                  f"(join the competition, then `python -m engine scout {args.slug} --wait 600`)")
+            return 0
+        print(f"local datasets — {len(rows)} files, {_fmt_bytes(total)} total")
+        for row in rows:
+            print(f"  {row['size']:>12,}  {row['name']}")
+        return 0
+
+    try:
+        rows = KaggleClient(settings).files(args.slug)
+    except KaggleCLIError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    total = sum(int(f.get("totalBytes") or f.get("total_bytes") or f.get("size") or 0)
+                for f in rows)
+    payload = {"slug": args.slug, "count": len(rows), "total_bytes": total, "files": rows}
+    if args.json:
+        return _emit(payload, True)
+    print(f"remote files — {args.slug}: {len(rows)} files, {_fmt_bytes(total)} total")
+    for item in rows:
+        name = item.get("name") or item.get("ref") or "?"
+        size = item.get("totalBytes") or item.get("total_bytes") or item.get("size") or 0
+        print(f"  {int(size):>12,}  {name}")
+    return 0
 
 
 def cmd_prompt(args: argparse.Namespace) -> int:
@@ -221,7 +287,8 @@ def cmd_cycle(args: argparse.Namespace) -> int:
         do_code=not args.no_code, do_execute=not args.no_train,
         force_code=args.force_code, max_attempts=args.max_attempts,
         target_score=args.target_score, title=args.title, metric=args.metric,
-        target=args.target, dry_run=args.dry_run, settings=settings,
+        target=args.target, dry_run=args.dry_run, wait_join=args.wait,
+        settings=settings,
     )
     human = "\n".join(outcome.log + ["", f"result: {outcome.status}"])
     return _emit(outcome.as_dict(), args.json, human)
@@ -301,10 +368,20 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("slug")
     p.add_argument("--no-download", action="store_true")
     p.add_argument("--refresh", action="store_true", help="re-fetch Kaggle metadata")
+    p.add_argument("--wait", type=int, default=0, metavar="SECONDS",
+                   help="poll the download for this long while the competition rules "
+                        "are unaccepted (403) — e.g. --wait 600")
     p.add_argument("--title")
     p.add_argument("--target")
     p.add_argument("--metric")
     p.add_argument("--target-score", type=float, dest="target_score")
+
+    p = add("files", "List competition files (remote or --local), fetch one with --fetch.", cmd_files)
+    p.add_argument("slug")
+    p.add_argument("--local", action="store_true",
+                   help="list competition/<slug>/datasets/ recursively with sizes")
+    p.add_argument("--fetch", metavar="NAME",
+                   help="download one file by name (e.g. train.csv or a zip)")
 
     p = add("prompt", "Print the coder prompt for an attempt (no OpenCode call).", cmd_prompt)
     p.add_argument("slug")
@@ -336,6 +413,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("slug", nargs="?", help="omit to pick the next unsolved competition")
     p.add_argument("--no-download", action="store_true")
     p.add_argument("--refresh", action="store_true")
+    p.add_argument("--wait", type=int, default=0, metavar="SECONDS",
+                   help="poll the download for this long while the competition rules "
+                        "are unaccepted (403) before deciding the cycle is blocked")
     p.add_argument("--no-code", action="store_true", help="skip OpenCode, only measure")
     p.add_argument("--no-train", action="store_true", help="scaffold/scout only")
     p.add_argument("--force-code", action="store_true", help="trigger the coder even if a notebook exists")

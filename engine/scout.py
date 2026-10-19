@@ -103,6 +103,7 @@ def scout(
     *,
     download: bool = True,
     refresh: bool = False,
+    wait_join: int = 0,
     title: str | None = None,
     target: str | None = None,
     metric: str | None = None,
@@ -121,6 +122,15 @@ def scout(
     registered = store.get_competition(slug, settings) or {}
     title = title or registered.get("title")
     target = target or registered.get("target")
+    if not target:
+        # The store has no target column; the last brief is the memory for it.
+        # Without this a plain `engine scout` (no --target) would overwrite a
+        # known target with null and the coder prompt would lose it.
+        try:
+            previous = json.loads((train_dir / "brief.json").read_text(encoding="utf-8"))
+            target = previous.get("target") or None
+        except (OSError, ValueError, TypeError):
+            pass
     metric = metric or registered.get("metric")
     target_score = (target_score if target_score is not None
                     else registered.get("target_score", settings.default_target_score))
@@ -158,8 +168,14 @@ def scout(
     if download:
         has_data = any(datasets_dir.glob("*.csv")) or any(datasets_dir.glob("*.parquet"))
         if not has_data:
+            def _on_wait(attempt: int, remaining: int) -> None:
+                print(f"[scout] rules not accepted yet — waiting for the join "
+                      f"({remaining}s left, attempt {attempt}); accept them at "
+                      f"https://www.kaggle.com/competitions/{slug}", flush=True)
+
             try:
-                KaggleClient(settings).download(slug, datasets_dir)
+                KaggleClient(settings).download(slug, datasets_dir,
+                                                wait=wait_join, on_wait=_on_wait)
             except KaggleCLIError as exc:
                 warnings.append(f"Dataset download failed: {exc}")
 

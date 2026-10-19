@@ -90,6 +90,9 @@ class Settings:
     vercel_sync_url: str | None
     vercel_sync_token: str | None
 
+    # extra tries after a transient coder failure (exit != 0 / empty response)
+    opencode_retries: int = 1
+
     def competition_dir(self, slug: str) -> Path:
         return self.competitions_root / slug
 
@@ -130,4 +133,5 @@ def load() -> Settings:
         kaggle_remote_token=os.environ.get("ENGINE_KAGGLE_REMOTE_TOKEN") or None,
         vercel_sync_url=os.environ.get("VERCEL_SYNC_URL") or None,
         vercel_sync_token=os.environ.get("VERCEL_SYNC_TOKEN") or None,
+        opencode_retries=_env_int("ENGINE_OPENCODE_RETRIES", 1),
     )

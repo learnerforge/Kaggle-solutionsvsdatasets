@@ -14,14 +14,15 @@ Two agents and one pipeline:
 python -m engine list                    # competitions and state
 python -m engine status                  # cycle stats, recent runs, sync status
 python -m engine init <slug> [--title T] [--target C] [--metric M] [--target-score S]
-python -m engine scout <slug> [--no-download] [--refresh]
+python -m engine scout <slug> [--no-download] [--refresh] [--wait N]
+python -m engine files <slug> [--local] [--fetch NAME]   # remote list / local list / one file
 python -m engine prompt <slug> [--attempt N]     # print the coder prompt
 python -m engine code <slug> [--attempt N] [--dry-run]
 python -m engine train <slug> [--timeout S]      # execute the notebook
 python -m engine score <slug> [--target-score S] [--fetch-lb]
 python -m engine verify <slug> [--artifacts]     # requirement checks
 python -m engine report [slug]                   # refresh frontend/data/dashboard.json
-python -m engine cycle [<slug>] [--dry-run] [--no-code] [--no-train] [--force-code]
+python -m engine cycle [<slug>] [--dry-run] [--no-code] [--no-train] [--force-code] [--wait N]
 python -m engine ask <slug> "question"
 python -m engine submit <slug> [--message M]     # requires ENGINE_SUBMIT_ENABLED=1
 python -m engine rules                           # print the rulebook
@@ -35,7 +36,10 @@ All commands accept `--json`.
 1. `ensure_scaffold` enforces the folder contract (R1) and materialises a
    runnable baseline notebook if the code folder is empty.
 2. `scout` gathers sources and profiles the data; **no code is written before
-   the sources are understood**.
+   the sources are understood**. Downloading resumes (nothing already on disk
+   is re-fetched) and, when the competition rules are not yet accepted in the
+   browser, `--wait N` polls for the join; without datasets the cycle stops
+   early as `blocked` instead of burning a coder attempt.
 3. The coder is triggered whenever the notebook is missing, and again after
    every attempt that misses the gate. The prompt = rulebook + brief + last
    feedback (ordered by the R7 ladder).
@@ -58,6 +62,7 @@ See `.env.example`. The important ones:
 | `ENGINE_MAX_ATTEMPTS` | coder attempts per cycle | `3` |
 | `ENGINE_NOTEBOOK_TIMEOUT` | seconds per notebook execution | `3600` |
 | `ENGINE_OPENCODE_TIMEOUT` | seconds per coder turn | `3600` |
+| `ENGINE_OPENCODE_RETRIES` | extra tries after a transient coder failure | `1` |
 | `ENGINE_OPENCODE_MODEL` / `ENGINE_OPENCODE_AGENT` | what to trigger | OpenCode defaults |
 | `ENGINE_SUBMIT_ENABLED` | allow real Kaggle submissions (R9) | `0` |
 | `ENGINE_TARGET_SCORE` | default gate | unset (per-competition wins) |

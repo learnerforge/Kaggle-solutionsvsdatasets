@@ -17,6 +17,7 @@ import json
 import re
 import shutil
 import subprocess
+import time
 import zipfile
 from pathlib import Path
 from typing import Any
@@ -30,6 +31,16 @@ class KaggleCLIError(RuntimeError):
         super().__init__(message)
         self.stderr = stderr
         self.returncode = returncode
+
+    @property
+    def forbidden(self) -> bool:
+        """True when the failure is the competition-join gate (HTTP 403).
+
+        Callers use this to decide between "retry/wait for the user to accept
+        the rules in the browser" and "real error, abort".
+        """
+        low = f"{self} {self.stderr}".lower()
+        return self.returncode == 403 or "403" in low or "forbidden" in low
 
 
 def _cli_prefix() -> list[str]:
@@ -96,9 +107,17 @@ class KaggleClient:
             err = (proc.stderr or proc.stdout or "").strip()
             hint = ""
             low = err.lower()
+            # `kaggle competitions <verb> <slug> ...` — args[2] is always the slug
+            # (download, files, pages, submit, submissions, leaderboard).
+            slug = args[2] if len(args) > 2 and args[0] == "competitions" else ""
             if "403" in low or "forbidden" in low:
-                hint = ("\nHint: join the competition in the browser and accept its rules; "
-                        "the API token alone is not enough (per-competition rule acceptance).")
+                url = f"https://www.kaggle.com/competitions/{slug}" if slug else ""
+                hint = ("\nHint: the competition rules are not accepted for this account. "
+                        "Join/accept in the browser"
+                        + (f" at {url}" if url else "")
+                        + " — no CLI command can do this (the API token alone is not "
+                        "enough). Then re-run; `scout`/`cycle --wait N` will poll for "
+                        "the join automatically.")
             elif "401" in low or "unauthorized" in low or "credentials" in low:
                 hint = ("\nHint: credentials missing or expired. Run `kaggle auth login` or set "
                         "KAGGLE_USERNAME / KAGGLE_KEY (see engine/secrets.py).")
@@ -234,28 +253,98 @@ class KaggleClient:
 
     # --- data ---------------------------------------------------------------
 
-    def download(self, slug: str, dest: Path, force: bool = False) -> Path:
+    def download(self, slug: str, dest: Path, force: bool = False,
+                 wait: int = 0, poll: int = 30, on_wait=None) -> Path:
+        """Download + unzip competition data — the engine version of
+
+            kaggle competitions download <slug> -p <folder>
+            Get-ChildItem *.zip | Expand-Archive
+
+        Improvements over the raw commands:
+
+        * **resume** — local work happens first (extract anything already
+          fetched), and complete data (csv/parquet + no unextracted zip)
+          short-circuits without touching the network; nothing already on
+          disk is re-fetched on every scout/cycle (``force`` re-runs it all);
+        * **join-wait** — Kaggle has no CLI "join" command: a 403 means the
+          rules are unaccepted in the browser. With ``wait > 0`` the call
+          polls every ``poll`` seconds until the join lands or the deadline
+          passes, reporting through ``on_wait(attempt, seconds_left)``.
+        """
         dest.mkdir(parents=True, exist_ok=True)
-        args = ["competitions", "download", slug, "--path", str(dest), "--quiet"]
-        if force:
-            args.append("--force")
-        self._run(args, timeout=3600)
+        if not force:
+            self._extract_zips(dest)  # zero-network: unpack what is already here
+            if self._has_data(dest) and not self._has_pending_zip(dest):
+                return dest  # complete on disk: zero network
+
+        deadline = time.time() + max(0, wait)
+        attempt = 0
+        while True:
+            attempt += 1
+            try:
+                args = ["competitions", "download", slug, "--path", str(dest), "--quiet"]
+                if force and attempt == 1:
+                    args.append("--force")
+                self._run(args, timeout=3600)
+                self._extract_zips(dest)
+                return dest
+            except KaggleCLIError as exc:
+                remaining = deadline - time.time()
+                if not (exc.forbidden and remaining > 0):
+                    raise
+                if on_wait is not None:
+                    on_wait(attempt, int(remaining))
+                time.sleep(max(1, min(poll, int(remaining))))
+
+    @staticmethod
+    def _has_data(dest: Path) -> bool:
+        """Tabular payload present. Deliberately csv/parquet only: a stray
+        fetched ``*.txt`` (data dictionary) must not make a half-populated
+        folder look complete."""
+        return any(dest.glob("*.csv")) or any(dest.glob("*.parquet"))
+
+    @staticmethod
+    def _has_pending_zip(dest: Path) -> bool:
+        """True when some zip on disk still needs extraction (marker missing
+        or older than the archive — i.e. re-downloaded or corrupt)."""
+        for zpath in dest.rglob("*.zip"):
+            if zpath.is_file() and not _zip_is_extracted(zpath, dest):
+                return True
+        return False
+
+    def download_file(self, slug: str, name: str, dest: Path) -> Path:
+        """Fetch a single named file — `kaggle competitions download -f <name>`.
+
+        Useful when the full archive is large or only one file is needed
+        (e.g. `data_description.csv` for the column dictionary).
+        """
+        dest.mkdir(parents=True, exist_ok=True)
+        self._run(["competitions", "download", slug, "-f", name,
+                   "--path", str(dest), "--quiet"], timeout=1800)
         self._extract_zips(dest)
+        for candidate in (dest / name, dest / f"{name}.zip"):
+            if candidate.exists():
+                return candidate
         return dest
 
     @staticmethod
     def _extract_zips(dest: Path) -> list[Path]:
+        """Unzip every archive under ``dest`` (nested zips included).
+
+        A `.extracted` marker skips re-extraction — but only while it is newer
+        than the zip itself (see ``_zip_is_extracted``), so a re-downloaded
+        archive invalidates its stale marker and gets unpacked again.
+        """
         extracted: list[Path] = []
-        for zpath in sorted(dest.glob("*.zip")):
-            marker = dest / f"{zpath.stem}.extracted"
-            if marker.exists():
-                continue
+        for zpath in sorted(p for p in dest.rglob("*.zip") if p.is_file()):
             try:
+                if _zip_is_extracted(zpath, dest):
+                    continue
                 with zipfile.ZipFile(zpath) as zf:
-                    zf.extractall(dest)
-                marker.touch()
+                    zf.extractall(zpath.parent)
+                (zpath.parent / f"{zpath.name}.extracted").touch()
                 extracted.append(zpath)
-            except zipfile.BadZipFile:
+            except (zipfile.BadZipFile, OSError):
                 continue
         return extracted
 
@@ -319,6 +408,19 @@ class KaggleClient:
             "top_score": max(values) if higher_is_better else min(values),
             "median_score": sorted(values)[len(values) // 2],
         }
+
+
+def _zip_is_extracted(zpath: Path, dest: Path) -> bool:
+    """Is this archive already unpacked? Checks the marker beside it plus the
+    legacy top-level location, and requires the marker to be at least as new
+    as the zip — a stale marker over a re-downloaded zip means "extract again"."""
+    markers = [zpath.parent / f"{zpath.name}.extracted",
+               dest / f"{zpath.stem}.extracted"]  # legacy location
+    try:
+        newest = max((m.stat().st_mtime for m in markers if m.exists()), default=0.0)
+        return newest >= zpath.stat().st_mtime
+    except OSError:  # pragma: no cover - vanished between glob and stat
+        return False
 
 
 def _extract_text(data: Any) -> str:
