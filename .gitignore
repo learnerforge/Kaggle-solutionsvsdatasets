@@ -226,3 +226,8 @@ temp/
 *.log
 *.tmp
 *.bak.*
+
+# `.vercel/` (project link: team/project ids, no secrets) — added when the
+# repo was linked for deploy. Deliberately NOT the `.env*` line the CLI also
+# tries to append: it would match `.env.example` after the negation above.
+.vercel
