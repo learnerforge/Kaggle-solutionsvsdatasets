@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-19T08:06:05+00:00",
-  "rules_version": "1.0.0",
+  "generated_at": "2026-10-19T10:56:49+00:00",
+  "rules_version": "1.1.0",
   "repo_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets",
   "engine": {
     "max_attempts": 3,
@@ -12,7 +12,7 @@
     "vercel_sync": false
   },
   "stats": {
-    "competitions": 1,
+    "competitions": 3,
     "runs": 3,
     "solved": 0,
     "last_run": {
@@ -22,10 +22,168 @@
       "finished_at": "2026-10-19T07:19:24+00:00"
     },
     "gate_reached": 0,
-    "tracked_on_disk": 1,
-    "gate_defined": 0
+    "tracked_on_disk": 3,
+    "gate_defined": 2
   },
   "competitions": [
+    {
+      "slug": "house-prices-advanced-regression-techniques",
+      "title": "House Prices: Advanced Regression Techniques",
+      "url": "https://www.kaggle.com/competitions/house-prices-advanced-regression-techniques",
+      "metric": "rmse",
+      "task": null,
+      "higher_is_better": false,
+      "target_score": 0.125,
+      "cv_mean": null,
+      "cv_std": null,
+      "cv_folds": [],
+      "oof_score": null,
+      "lb_score": null,
+      "gap": null,
+      "reached": null,
+      "notes": [
+        "train/metrics.json missing \u2014 nothing measured yet (rule R4)"
+      ],
+      "status": "registered",
+      "attempts": 0,
+      "last_attempt_at": null,
+      "readme_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/house-prices-advanced-regression-techniques/readme.md",
+      "notebook_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/house-prices-advanced-regression-techniques/code/house-prices-advanced-regression-techniques.ipynb",
+      "problem_statement_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/house-prices-advanced-regression-techniques/PROBLEM_STATEMENT.md",
+      "brief_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/house-prices-advanced-regression-techniques/BRIEF.md",
+      "checks": [
+        {
+          "rule": "R1",
+          "title": "Folder contract",
+          "status": "pass",
+          "detail": "code/<slug>.ipynb, datasets/, train/ and readme.md all present."
+        },
+        {
+          "rule": "R10",
+          "title": "Legacy folder untouched",
+          "status": "pass",
+          "detail": "no reference to the legacy workspace"
+        },
+        {
+          "rule": "R2",
+          "title": "Notebook runs top-to-bottom",
+          "status": "pass",
+          "detail": "10 code cells, valid nbformat v4"
+        },
+        {
+          "rule": "R3",
+          "title": "Determinism",
+          "status": "pass",
+          "detail": "SEED constant=yes, seeding calls=5"
+        },
+        {
+          "rule": "R6",
+          "title": "Leakage discipline",
+          "status": "pass",
+          "detail": "folds=yes, OOF completeness assert=yes"
+        },
+        {
+          "rule": "R9",
+          "title": "No uploads from the notebook",
+          "status": "pass",
+          "detail": "notebook never submits"
+        },
+        {
+          "rule": "R12",
+          "title": "Security and git hygiene",
+          "status": "pass",
+          "detail": "no credential patterns; no datasets or train artifacts tracked"
+        },
+        {
+          "rule": "R11",
+          "title": "README write-up",
+          "status": "pass",
+          "detail": "5/5 required sections present (R11)"
+        }
+      ],
+      "checks_failed": [],
+      "checks_passed": true,
+      "history": []
+    },
+    {
+      "slug": "nlp-getting-started",
+      "title": "NLP with Disaster Tweets",
+      "url": "https://www.kaggle.com/competitions/nlp-getting-started",
+      "metric": "f1",
+      "task": null,
+      "higher_is_better": true,
+      "target_score": 0.75,
+      "cv_mean": null,
+      "cv_std": null,
+      "cv_folds": [],
+      "oof_score": null,
+      "lb_score": null,
+      "gap": null,
+      "reached": null,
+      "notes": [
+        "train/metrics.json missing \u2014 nothing measured yet (rule R4)"
+      ],
+      "status": "registered",
+      "attempts": 0,
+      "last_attempt_at": null,
+      "readme_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/readme.md",
+      "notebook_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/code/nlp-getting-started.ipynb",
+      "problem_statement_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/PROBLEM_STATEMENT.md",
+      "brief_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/BRIEF.md",
+      "checks": [
+        {
+          "rule": "R1",
+          "title": "Folder contract",
+          "status": "pass",
+          "detail": "code/<slug>.ipynb, datasets/, train/ and readme.md all present."
+        },
+        {
+          "rule": "R10",
+          "title": "Legacy folder untouched",
+          "status": "pass",
+          "detail": "no reference to the legacy workspace"
+        },
+        {
+          "rule": "R2",
+          "title": "Notebook runs top-to-bottom",
+          "status": "pass",
+          "detail": "10 code cells, valid nbformat v4"
+        },
+        {
+          "rule": "R3",
+          "title": "Determinism",
+          "status": "pass",
+          "detail": "SEED constant=yes, seeding calls=5"
+        },
+        {
+          "rule": "R6",
+          "title": "Leakage discipline",
+          "status": "pass",
+          "detail": "folds=yes, OOF completeness assert=yes"
+        },
+        {
+          "rule": "R9",
+          "title": "No uploads from the notebook",
+          "status": "pass",
+          "detail": "notebook never submits"
+        },
+        {
+          "rule": "R12",
+          "title": "Security and git hygiene",
+          "status": "pass",
+          "detail": "no credential patterns; no datasets or train artifacts tracked"
+        },
+        {
+          "rule": "R11",
+          "title": "README write-up",
+          "status": "pass",
+          "detail": "5/5 required sections present (R11)"
+        }
+      ],
+      "checks_failed": [],
+      "checks_passed": true,
+      "history": []
+    },
     {
       "slug": "playground-series-s6e2",
       "title": "Predicting Heart Disease",
@@ -48,7 +206,7 @@
       "attempts": 3,
       "last_attempt_at": "2026-10-19T07:19:24+00:00",
       "readme_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/readme.md",
-      "notebook_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/code/playground-series-s6e2.pynb",
+      "notebook_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/code/playground-series-s6e2.ipynb",
       "problem_statement_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/PROBLEM_STATEMENT.md",
       "brief_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/BRIEF.md",
       "checks": [
@@ -56,7 +214,7 @@
           "rule": "R1",
           "title": "Folder contract",
           "status": "pass",
-          "detail": "code/<slug>.pynb, datasets/, train/ and readme.md all present."
+          "detail": "code/<slug>.ipynb, datasets/, train/ and readme.md all present."
         },
         {
           "rule": "R10",
@@ -141,12 +299,12 @@
     {
       "id": "R1",
       "title": "Folder contract",
-      "text": "Every deliverable lives under competition/<slug>/: code/<slug>.pynb is the ONLY source artifact; datasets/ is read-only Kaggle data; train/ holds all run outputs; readme.md is the write-up. Never write outside the competition folder, never touch .engine/, frontend/data belongs to the report step only, and the legacy NTG/ folder does not exist (rule R10)."
+      "text": "Every deliverable lives under competition/<slug>/: code/<slug>.ipynb is the ONLY source artifact; datasets/ is read-only Kaggle data; train/ holds all run outputs; readme.md is the write-up. Never write outside the competition folder, never touch .engine/, frontend/data belongs to the report step only, and the legacy NTG/ folder does not exist (rule R10)."
     },
     {
       "id": "R2",
       "title": "One notebook, top to bottom",
-      "text": "code/<slug>.pynb must run cleanly top-to-bottom on a fresh machine after `pip install -r requirements.txt`, kernel 'python3'. No manual steps, no hidden state between runs, no network access except reading ../datasets/, no uploads."
+      "text": "code/<slug>.ipynb must run cleanly top-to-bottom on a fresh machine after `pip install -r requirements.txt`, kernel 'python3'. No manual steps, no hidden state between runs, no network access except reading ../datasets/, no uploads."
     },
     {
       "id": "R3",
@@ -201,7 +359,7 @@
     {
       "id": "R13",
       "title": "Reproducible artifacts",
-      "text": "Every executed attempt leaves behind: train/metrics.json, train/submission.csv (when produced), train/oof_<model>.csv, train/importance_<model>.csv, the executed notebook copy, and the attempt log \u2014 so any number in the README can be traced to its run."
+      "text": "Every executed attempt leaves behind: train/metrics.json, train/submission.csv (when produced), train/oof_<model>.csv, train/importance_<model>.csv, the trained model itself (train/model.joblib \u2014 the fitted estimators, so every notebook ships a loadable model and not just a score), the executed notebook copy, and the attempt log \u2014 so any number in the README can be traced to its run."
     }
   ],
   "pipeline": [

@@ -70,7 +70,7 @@ def coder_task_prompt(
     settings: Settings | None = None,
 ) -> str:
     settings = settings or __import__("engine.settings", fromlist=["load"]).load()
-    notebook = f"competition/{slug}/code/{slug}.pynb"
+    notebook = f"competition/{slug}/code/{slug}.ipynb"
     parts = [
         f"# Task — write the Kaggle solution notebook for `{slug}` (attempt {attempt}/{settings.max_attempts})",
         "",
@@ -94,6 +94,8 @@ def coder_task_prompt(
         "* Writes `../train/submission.csv` matching `sample_submission.csv` when a test "
         "set exists.",
         "* Leaves `../train/oof_<model>.csv` and `../train/importance_<model>.csv`.",
+        "* Saves the trained model to `../train/model.joblib` (fitted estimators, "
+        "re-loadable without retraining — every notebook ships a model, rule R13).",
         "* No credentials, no uploads, no network beyond Kaggle data already on disk.",
         "* Deterministic: one SEED constant seeds every library (R3).",
         "",

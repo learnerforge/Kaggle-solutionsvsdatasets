@@ -72,7 +72,7 @@ def run_all(slug: str, *, settings: Settings | None = None,
                if not p.exists()]
     checks.append(Check(
         "R1", "Folder contract", PASS if not missing else FAIL,
-        "code/<slug>.pynb, datasets/, train/ and readme.md all present."
+        "code/<slug>.ipynb, datasets/, train/ and readme.md all present."
         if not missing else f"missing: {', '.join(missing)}",
     ))
 
@@ -169,9 +169,12 @@ def run_all(slug: str, *, settings: Settings | None = None,
         metrics = train_dir / "metrics.json"
         oof = list(train_dir.glob("oof_*.csv"))
         importance = list(train_dir.glob("importance_*.csv"))
+        model_files = list(train_dir.glob("model.*"))
         executed = list(train_dir.glob("*_executed.ipynb"))
         submission = train_dir / "submission.csv"
         missing_art = []
+        if not model_files:
+            missing_art.append("model.* (trained model artifact, rule R13)")
         if not metrics.is_file():
             missing_art.append("metrics.json")
         if not oof:
@@ -186,6 +189,7 @@ def run_all(slug: str, *, settings: Settings | None = None,
         checks.append(Check(
             "R13", "Reproducible artifacts", PASS if not missing_art else FAIL,
             f"oof files={len(oof)}, importance files={len(importance)}, "
+            f"model={'yes' if model_files else 'no'}, "
             f"submission={'yes' if submission.is_file() else 'no'}, "
             f"executed copy={'yes' if executed else 'no'}"
             + (f"; missing: {missing_art}" if missing_art else ""),

@@ -57,7 +57,7 @@ Kaggle-solutionsvsdatasets/
 │   ├── profile.py                <- schema / missingness / parity / target readout
 │   ├── prompts.py                <- coder task + "ask" prompt builders
 │   ├── opencode_runner.py        <- agent #2: headless `opencode run` per attempt
-│   ├── notebook_runner.py        <- executes code/<slug>.pynb, keeps artifacts
+│   ├── notebook_runner.py        <- executes code/<slug>.ipynb, keeps artifacts
 │   ├── templates.py              <- baseline notebook + README + folder scaffold
 │   ├── validate.py               <- requirement checks with evidence (frontend)
 │   ├── scorer.py                 <- score gate + ladder-ordered feedback
@@ -70,7 +70,7 @@ Kaggle-solutionsvsdatasets/
 │                                    requirements / rules + data/dashboard.json)
 ├── competition/
 │   └── <slug>/
-│       ├── code/<slug>.pynb      <- the ONLY source artifact (R1)
+│       ├── code/<slug>.ipynb      <- the ONLY source artifact (R1)
 │       ├── datasets/             <- Kaggle CLI download — git-ignored
 │       ├── train/                <- metrics, submission, oof, reports — git-ignored
 │       ├── PROBLEM_STATEMENT.md  <- fetched from Kaggle by the scout
@@ -132,7 +132,7 @@ prompt is built from that brief, so code is never written blind.
 **Agent 2 — Coder** (`engine/opencode_runner.py`). OpenCode, triggered headlessly
 (`opencode run --format json --auto --file <prompt>`). It receives: the full
 rulebook, the brief, the deliverable contract, and the feedback from the previous
-attempt. It writes `code/<slug>.pynb` and keeps `readme.md` honest. Its final
+attempt. It writes `code/<slug>.ipynb` and keeps `readme.md` honest. Its final
 message ("what I changed, what I measured, what I need next") is stored as the
 communication record for that attempt. `python -m engine ask <slug> "question"`
 opens the same channel for questions about the competition sources.
@@ -147,7 +147,7 @@ competition by `engine verify`. Full text: `python -m engine rules` or the
 
 | Rule | Requirement |
 | --- | --- |
-| R1 | Folder contract: `code/<slug>.pynb` is the only source artifact; `datasets/` read-only; `train/` for outputs; `readme.md` the write-up |
+| R1 | Folder contract: `code/<slug>.ipynb` is the only source artifact; `datasets/` read-only; `train/` for outputs; `readme.md` the write-up |
 | R2 | One notebook, runs top-to-bottom on a fresh machine, no manual steps |
 | R3 | Determinism: one `SEED` seeds every library |
 | R4 | Honest measurement: OOF-only scores, `train/metrics.json` every run |
@@ -304,7 +304,7 @@ python -m engine cycle playground-series-s6e2        # code -> train -> score ->
 python -m engine score playground-series-s6e2 --fetch-lb
 ```
 
-The starter notebook (`code/playground-series-s6e2.pynb`) is a leak-free
+The starter notebook (`code/playground-series-s6e2.ipynb`) is a leak-free
 LightGBM baseline: auto target detection, stratified 5-fold CV, OOF metric,
 fold-averaged test predictions, `metrics.json` + `submission.csv` + OOF and
 importance artifacts. The coder extends it from there. Set the gate once you

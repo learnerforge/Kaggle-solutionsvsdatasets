@@ -99,7 +99,7 @@ class Settings:
         return self.state_dir / "engine.db"
 
     def code_path(self, slug: str) -> Path:
-        return self.competition_dir(slug) / "code" / f"{slug}.pynb"
+        return self.competition_dir(slug) / "code" / f"{slug}.ipynb"
 
     def datasets_dir(self, slug: str) -> Path:
         return self.competition_dir(slug) / "datasets"

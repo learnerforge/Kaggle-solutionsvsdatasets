@@ -31,7 +31,7 @@ kaggle>=1.6,<3
 # --- engine/ (agent orchestration) -------------------------------------------
 # dotenv: loads .env so credentials never sit in shell history
 python-dotenv>=1.0,<2
-# notebook execution: the engine runs competition/<slug>/code/<slug>.pynb
+# notebook execution: the engine runs competition/<slug>/code/<slug>.ipynb
 nbformat>=5.9,<6
 nbclient>=0.9,<1
 ipykernel>=6.29,<7

@@ -49,6 +49,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import joblib
 from sklearn.metrics import (accuracy_score, balanced_accuracy_score, log_loss,
                              mean_absolute_error, mean_squared_error, roc_auc_score)
 from sklearn.model_selection import KFold, StratifiedKFold
@@ -295,6 +296,13 @@ importance = pd.DataFrame({
 }).sort_values("importance", ascending=False)
 importance.to_csv(TRAIN_DIR / "importance_lgbm.csv", index=False)
 
+# R13: the trained model ships alongside the notebook — the fitted fold
+# estimators exactly as they produced the OOF score above.
+joblib.dump({"models": models, "feature_cols": feature_cols, "seed": SEED,
+             "metric": METRIC, "task": TASK},
+            TRAIN_DIR / "model.joblib")
+print("wrote", (TRAIN_DIR / "model.joblib").resolve())
+
 print()
 print(f"OOF {METRIC}: {cv_mean:.6f} +/- {cv_std:.6f}  (folds: {metrics['cv_folds']})")
 if TARGET_SCORE is not None:
@@ -476,7 +484,7 @@ def scaffold(competition_dir: Path, slug: str, title: str | None = None,
         if not keep.exists():
             keep.write_text(GITKEEP, encoding="utf-8")
 
-    notebook_path = code_dir / f"{slug}.pynb"
+    notebook_path = code_dir / f"{slug}.ipynb"
     if force or not notebook_path.exists():
         nb = starter_notebook(slug, target=target, metric=metric, target_score=target_score)
         nbformat.write(nb, notebook_path)

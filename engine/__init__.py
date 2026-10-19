@@ -6,7 +6,7 @@ The engine runs two agents and one pipeline:
   pulls the problem statement, evaluation metric, file list and a dataset
   profile before any code is written, so the coder never codes blind.
 * **Coder** (``engine/opencode_runner.py``) — OpenCode itself, triggered on
-  every attempt, writing ``competition/<slug>/code/<slug>.pynb`` under the
+  every attempt, writing ``competition/<slug>/code/<slug>.ipynb`` under the
   rules in ``engine/rules.py`` and answering questions about the sources.
 * **Pipeline** (``engine/orchestrator.py``) — scout -> code -> execute ->
   score-gate -> iterate, with every number recorded in a local SQLite store

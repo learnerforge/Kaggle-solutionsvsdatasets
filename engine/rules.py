@@ -7,14 +7,14 @@ injected into every coder prompt — see :mod:`engine.prompts`.
 
 from __future__ import annotations
 
-RULEBOOK_VERSION = "1.0.0"
+RULEBOOK_VERSION = "1.1.0"
 
 # (id, title, text)
 RULES: list[tuple[str, str, str]] = [
     (
         "R1",
         "Folder contract",
-        "Every deliverable lives under competition/<slug>/: code/<slug>.pynb is the ONLY "
+        "Every deliverable lives under competition/<slug>/: code/<slug>.ipynb is the ONLY "
         "source artifact; datasets/ is read-only Kaggle data; train/ holds all run outputs; "
         "readme.md is the write-up. Never write outside the competition folder, never touch "
         ".engine/, frontend/data belongs to the report step only, and the legacy NTG/ folder "
@@ -23,7 +23,7 @@ RULES: list[tuple[str, str, str]] = [
     (
         "R2",
         "One notebook, top to bottom",
-        "code/<slug>.pynb must run cleanly top-to-bottom on a fresh machine after "
+        "code/<slug>.ipynb must run cleanly top-to-bottom on a fresh machine after "
         "`pip install -r requirements.txt`, kernel 'python3'. No manual steps, no hidden "
         "state between runs, no network access except reading ../datasets/, no uploads.",
     ),
@@ -108,8 +108,10 @@ RULES: list[tuple[str, str, str]] = [
         "R13",
         "Reproducible artifacts",
         "Every executed attempt leaves behind: train/metrics.json, train/submission.csv (when "
-        "produced), train/oof_<model>.csv, train/importance_<model>.csv, the executed notebook "
-        "copy, and the attempt log — so any number in the README can be traced to its run.",
+        "produced), train/oof_<model>.csv, train/importance_<model>.csv, the trained model "
+        "itself (train/model.joblib — the fitted estimators, so every notebook ships a "
+        "loadable model and not just a score), the executed notebook copy, and the attempt "
+        "log — so any number in the README can be traced to its run.",
     ),
 ]
 

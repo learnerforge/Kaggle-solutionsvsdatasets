@@ -148,7 +148,7 @@ def _competition_view(slug: str, settings: Settings) -> dict:
         "attempts": len(history),
         "last_attempt_at": history[0].get("finished_at") if history else None,
         "readme_url": f"{base}/blob/main/competition/{slug}/readme.md",
-        "notebook_url": f"{base}/blob/main/competition/{slug}/code/{slug}.pynb",
+        "notebook_url": f"{base}/blob/main/competition/{slug}/code/{slug}.ipynb",
         "problem_statement_url": f"{base}/blob/main/competition/{slug}/PROBLEM_STATEMENT.md",
         "brief_url": f"{base}/blob/main/competition/{slug}/BRIEF.md",
         "checks": checks.get("checks", []),

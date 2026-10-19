@@ -5,7 +5,7 @@ Two agents and one pipeline:
 | Agent | Module | Job |
 | --- | --- | --- |
 | **Scout** | `scout.py` (+ `kaggle_client.py`, `profile.py`) | Stays alive to the competition: problem statement, evaluation page, file list, datasets, schema/target profile. Writes `PROBLEM_STATEMENT.md`, `BRIEF.md`, `train/brief.json`. |
-| **Coder** | `opencode_runner.py` (+ `prompts.py`, `rules.py`) | OpenCode itself, triggered per attempt. Writes/repairs `competition/<slug>/code/<slug>.pynb` under the rulebook and answers questions about the sources (`engine ask`). |
+| **Coder** | `opencode_runner.py` (+ `prompts.py`, `rules.py`) | OpenCode itself, triggered per attempt. Writes/repairs `competition/<slug>/code/<slug>.ipynb` under the rulebook and answers questions about the sources (`engine ask`). |
 | **Pipeline** | `orchestrator.py` (+ `templates.py`, `notebook_runner.py`, `validate.py`, `scorer.py`, `report.py`) | scout → code → execute → score gate → iterate → report. State in SQLite (`store.py`), projection to the frontend, optional Vercel sync (`vercel_sync.py`). |
 
 ## Commands
