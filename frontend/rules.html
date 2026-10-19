@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rulebook — Kaggle Solutions vs Datasets</title>
+  <meta name="description" content="The versioned rulebook the coding agent works under: folder contract, honesty, score gate, optimization ladder, security.">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="rules">
+
+<header class="site">
+  <div class="head-inner">
+    <div class="brand"><span class="glyph">K</span> Kaggle Solutions vs Datasets</div>
+    <nav class="site">
+      <a data-nav="index" href="index.html">Overview</a>
+      <a data-nav="competitions" href="competitions.html">Competitions</a>
+      <a data-nav="requirements" href="requirements.html">Requirements</a>
+      <a data-nav="rules" href="rules.html">Rulebook</a>
+    </nav>
+    <div class="head-meta" id="head-meta"></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <h1>The rulebook</h1>
+    <p class="lede">
+      Every coder prompt carries the full rule text below. The version is recorded
+      with each run, so any score can be traced back to the contract it was produced
+      under. Run <code>python -m engine rules</code> to print the same text locally.
+    </p>
+  </section>
+
+  <h2 class="section-title">Rules</h2>
+  <div id="rules"></div>
+
+  <h2 class="section-title">The optimization ladder (R7)</h2>
+  <div class="panel">
+    <p style="margin-top:0;color:var(--muted)">
+      When a cycle misses the gate, the feedback sent back to the coder is ordered by
+      this ladder — evidence before capacity, measurement before modelling:
+    </p>
+    <ol class="pipeline">
+      <li><span class="stage">1. Clean leak-free baseline</span>
+          <div class="desc">A measured, boring solution that runs top-to-bottom.</div></li>
+      <li><span class="stage">2. Sanity-check folds and metric</span>
+          <div class="desc">Fold variance, worst fold, metric implementation bugs.</div></li>
+      <li><span class="stage">3. Domain feature engineering</span>
+          <div class="desc">From the problem statement — not from a feature list on the internet.</div></li>
+      <li><span class="stage">4. Model zoo</span>
+          <div class="desc">LightGBM + XGBoost + CatBoost, each measured separately on OOF.</div></li>
+      <li><span class="stage">5. OOF-fitted ensemble</span>
+          <div class="desc">Rank-mean for rank metrics; hill-climb weights otherwise — never fitted on test predictions.</div></li>
+      <li><span class="stage">6. Fold-safe target encoding</span>
+          <div class="desc">High-cardinality columns, encoded excluding each row's own fold.</div></li>
+      <li><span class="stage">7. Pseudo-labelling</span>
+          <div class="desc">Confident test rows, validated honestly on OOF.</div></li>
+      <li><span class="stage">8. Bounded hyperparameter search</span>
+          <div class="desc">Fixed seed budget, only after steps 1–4 are clean and measured.</div></li>
+    </ol>
+  </div>
+
+  <h2 class="section-title">Security &amp; operations</h2>
+  <div class="panel">
+    <div id="engine-rules"></div>
+    <p style="color:var(--muted);margin-bottom:0">
+      Kaggle credentials are resolved from environment variables or
+      <code>~/.kaggle/kaggle.json</code> — never from a shared database, never
+      printed, never committed. If a Vercel database is attached later, it stores
+      the dashboard projection only; credentials stay in Vercel Environment
+      Variables and are served through a dedicated endpoint that the engine reads
+      only when explicitly configured. Datasets and training artifacts are
+      git-ignored by construction (R12), and the legacy <code>NTG/</code> folder is
+      never read or written by the engine (R10).
+    </p>
+  </div>
+
+  <footer class="site">
+    <div class="wrap" style="padding-bottom:0;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border:none;">
+      <span id="foot-generated"></span>
+      <a data-repo-link href="#">source on GitHub</a>
+    </div>
+  </footer>
+
+</main>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

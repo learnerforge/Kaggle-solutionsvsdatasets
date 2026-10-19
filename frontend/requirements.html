@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Requirements matrix — Kaggle Solutions vs Datasets</title>
+  <meta name="description" content="Which rulebook requirements each competition satisfies, with evidence.">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="requirements">
+
+<header class="site">
+  <div class="head-inner">
+    <div class="brand"><span class="glyph">K</span> Kaggle Solutions vs Datasets</div>
+    <nav class="site">
+      <a data-nav="index" href="index.html">Overview</a>
+      <a data-nav="competitions" href="competitions.html">Competitions</a>
+      <a data-nav="requirements" href="requirements.html">Requirements</a>
+      <a data-nav="rules" href="rules.html">Rulebook</a>
+    </nav>
+    <div class="head-meta" id="head-meta"></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <h1>Requirements matrix</h1>
+    <p class="lede">
+      The problem statement is satisfied when the rulebook is satisfied. Every cell
+      below is produced by <code>python -m engine verify &lt;slug&gt;</code> from
+      evidence on disk — the folder contract, the notebook's structure, leakage
+      guards, git hygiene and the artifact trail. Structural failures always
+      outrank scores: a notebook that cannot run is not a solution.
+    </p>
+    <p class="lede" style="display:flex;gap:10px;flex-wrap:wrap;">
+      <span class="chip pass">pass — requirement met, evidence linked</span>
+      <span class="chip warn">warn — partial, review</span>
+      <span class="chip fail">fail — requirement violated</span>
+      <span class="chip na">n/a — not applicable yet</span>
+    </p>
+  </section>
+
+  <h2 class="section-title">Matrix</h2>
+  <div class="panel scroll-x" id="matrix"></div>
+
+  <h2 class="section-title">Evidence per competition</h2>
+  <div id="details"></div>
+
+  <footer class="site">
+    <div class="wrap" style="padding-bottom:0;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border:none;">
+      <span id="foot-generated"></span>
+      <a data-repo-link href="#">source on GitHub</a>
+    </div>
+  </footer>
+
+</main>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

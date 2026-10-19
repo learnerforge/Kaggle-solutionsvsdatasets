@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Competitions — Kaggle Solutions vs Datasets</title>
+  <meta name="description" content="Every tracked competition: OOF score, gate status, leaderboard gap and requirement checks.">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="competitions">
+
+<header class="site">
+  <div class="head-inner">
+    <div class="brand"><span class="glyph">K</span> Kaggle Solutions vs Datasets</div>
+    <nav class="site">
+      <a data-nav="index" href="index.html">Overview</a>
+      <a data-nav="competitions" href="competitions.html">Competitions</a>
+      <a data-nav="requirements" href="requirements.html">Requirements</a>
+      <a data-nav="rules" href="rules.html">Rulebook</a>
+    </nav>
+    <div class="head-meta" id="head-meta"></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <h1>Competitions</h1>
+    <p class="lede">
+      One card per competition. <strong>OOF</strong> is the measured out-of-fold
+      score from <code>train/metrics.json</code> — never an estimate. The gap column
+      is public-leaderboard minus OOF; a large negative gap means the validation
+      split is unrepresentative, which the rulebook makes diagnosable before any
+      new model is added (R5).
+    </p>
+  </section>
+
+  <h2 class="section-title">Tracked competitions</h2>
+  <div class="comp-grid" id="comps"></div>
+
+  <h2 class="section-title">Recent runs</h2>
+  <div class="panel scroll-x" id="recent-runs"></div>
+
+  <footer class="site">
+    <div class="wrap" style="padding-bottom:0;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border:none;">
+      <span id="foot-generated"></span>
+      <a data-repo-link href="#">source on GitHub</a>
+    </div>
+  </footer>
+
+</main>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

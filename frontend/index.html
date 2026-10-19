@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kaggle Solutions vs Datasets — Overview</title>
+  <meta name="description" content="Engine-driven Kaggle competition solver: scout, OpenCode coder, score gate, full artifact trail.">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body data-page="index">
+
+<header class="site">
+  <div class="head-inner">
+    <div class="brand"><span class="glyph">K</span> Kaggle Solutions vs Datasets</div>
+    <nav class="site">
+      <a data-nav="index" href="index.html">Overview</a>
+      <a data-nav="competitions" href="competitions.html">Competitions</a>
+      <a data-nav="requirements" href="requirements.html">Requirements</a>
+      <a data-nav="rules" href="rules.html">Rulebook</a>
+    </nav>
+    <div class="head-meta" id="head-meta"></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <h1>Every competition solved, <span class="lime">with receipts.</span></h1>
+    <p class="lede">
+      An engine that keeps one agent permanently briefed on each Kaggle competition
+      (problem statement, evaluation metric, datasets, profile) and triggers OpenCode
+      to write the solution notebook every time it is asked — under a versioned
+      rulebook, gated on a score target, and leaving an artifact trail for every
+      number it claims.
+    </p>
+    <p class="lede">
+      No competition is dropped: the cycle runs every 24 hours (locally or through
+      GitHub Actions), and a run only counts when the out-of-fold score is measured,
+      recorded and matched against the gate.
+    </p>
+  </section>
+
+  <div class="cards" id="stats"></div>
+
+  <h2 class="section-title">How one 24-hour cycle runs</h2>
+  <div class="panel">
+    <ol class="pipeline" id="pipeline"></ol>
+  </div>
+
+  <div class="panel">
+    <h3>Last recorded run</h3>
+    <div id="last-run"></div>
+  </div>
+
+  <h2 class="section-title">Engine configuration</h2>
+  <div class="panel">
+    <div id="engine-config"></div>
+  </div>
+
+  <h2 class="section-title">Where everything lives</h2>
+  <div class="panel">
+<pre class="mono" style="margin:0;overflow-x:auto;color:var(--muted);font-size:13px">
+Kaggle-solutionsvsdatasets/
+├── engine/                     <- scout + coder + pipeline (python -m engine …)
+│   ├── rules.py                <- the rulebook (R1–R13) injected into every coder prompt
+│   ├── scout.py                <- agent #1: problem statement, files, dataset profile
+│   ├── opencode_runner.py      <- agent #2: triggers OpenCode to write the notebook
+│   ├── notebook_runner.py      <- executes code/&lt;slug&gt;.pynb and keeps the artifacts
+│   ├── scorer.py               <- score gate: metrics.json vs target (R5)
+│   └── orchestrator.py         <- scout → code → train → score → iterate
+├── frontend/                   <- this dashboard (static, reads data/dashboard.json)
+├── competition/
+│   └── &lt;slug&gt;/
+│       ├── code/&lt;slug&gt;.pynb    <- the only source artifact (R1)
+│       ├── datasets/           <- Kaggle CLI download — git-ignored (R12)
+│       ├── train/              <- metrics.json, submission.csv, oof, reports — git-ignored
+│       ├── PROBLEM_STATEMENT.md
+│       ├── BRIEF.md
+│       └── readme.md           <- algorithm walkthrough + score matching (R11)
+└── .engine/                    <- local SQLite state — git-ignored
+</pre>
+  </div>
+
+  <footer class="site">
+    <div class="wrap" style="padding-bottom:0;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border:none;">
+      <span id="foot-generated"></span>
+      <a data-repo-link href="#">source on GitHub</a>
+    </div>
+  </footer>
+
+</main>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
