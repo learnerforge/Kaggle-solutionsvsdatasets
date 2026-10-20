@@ -1,7 +1,7 @@
 /* ==========================================================================
-   Kaggle Solutions vs Datasets — dashboard theme
+   Kaggle Solutions vs Datasets: dashboard theme
    EXCITEMENT MODE: deep navy, electric orange, vivid yellow, glow accents.
-   High energy · Dynamic · Futuristic — mono numerals, status chips.
+   High energy, dynamic, futuristic: mono numerals, status chips.
    No framework; served statically from GitHub Pages or any web server.
    ========================================================================== */
 
@@ -9,14 +9,14 @@
   color-scheme: dark;
 
   /* --- EXCITEMENT MODE palette ---------------------------------------------- */
-  --excitement-primary: #FF6D00;    /* Electric Orange — primary excitement  */
-  --excitement-secondary: #FFD600;  /* Vivid Yellow — energy and highlights   */
-  --excitement-accent: #FF2E93;     /* Hot Pink — playful excitement          */
-  --excitement-alert: #FF1744;      /* Neon Red — intensity and urgency       */
-  --excitement-purple: #B388FF;     /* Electric Purple — creative energy      */
-  --excitement-cyan: #00E5FF;       /* Bright Cyan — futuristic accents       */
-  --excitement-background: #101426; /* Deep Navy — dark background            */
-  --excitement-text: #FFFFFF;       /* Pure White — text on dark surfaces     */
+  --excitement-primary: #FF6D00;    /* Electric Orange: primary excitement   */
+  --excitement-secondary: #FFD600;  /* Vivid Yellow: energy and highlights    */
+  --excitement-accent: #FF2E93;     /* Hot Pink: playful excitement           */
+  --excitement-alert: #FF1744;      /* Neon Red: intensity and urgency        */
+  --excitement-purple: #B388FF;     /* Electric Purple: creative energy       */
+  --excitement-cyan: #00E5FF;       /* Bright Cyan: futuristic accents        */
+  --excitement-background: #101426; /* Deep Navy: dark background             */
+  --excitement-text: #FFFFFF;       /* Pure White: text on dark surfaces      */
 
   /* --- semantic aliases used across the theme ------------------------------- */
   --ink: var(--excitement-background);
@@ -63,7 +63,7 @@ body {
 a { color: var(--accent); text-decoration: none; transition: color .15s ease; }
 a:hover { text-decoration: underline; }
 
-/* futuristic cyan focus ring — distinct from orange links/controls */
+/* futuristic cyan focus ring, distinct from orange links/controls */
 :focus-visible {
   outline: 2px solid var(--excitement-cyan);
   outline-offset: 2px;
@@ -272,7 +272,7 @@ pre.tree {
 .chip {
   display: inline-block;
   padding: 2px 9px;
-  border-radius: 999px;
+  border-radius: 4px;
   font-family: var(--mono);
   font-size: 12px;
   border: 1px solid transparent;
@@ -531,14 +531,14 @@ progress.prog {
   appearance: none;
   -webkit-appearance: none;
   border: none;
-  border-radius: 999px;
+  border-radius: 3px;
   background: var(--panel-2);
   overflow: hidden;
 }
 
 progress.prog::-webkit-progress-bar { background: var(--panel-2); }
-progress.prog::-webkit-progress-value { background: var(--accent-dim); border-radius: 999px; }
-progress.prog::-moz-progress-bar { background: var(--accent-dim); border-radius: 999px; }
+progress.prog::-webkit-progress-value { background: var(--accent-dim); border-radius: 3px; }
+progress.prog::-moz-progress-bar { background: var(--accent-dim); border-radius: 3px; }
 progress.prog.good::-webkit-progress-value { background: var(--pass); }
 progress.prog.good::-moz-progress-bar { background: var(--pass); }
 progress.prog.bad::-webkit-progress-value { background: var(--fail); }

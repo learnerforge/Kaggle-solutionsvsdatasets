@@ -1,8 +1,8 @@
-/* Kaggle Solutions vs Datasets — frontend logic.
+/* Kaggle Solutions vs Datasets: frontend logic.
  *
  * The site is fully static: every page fetches data/dashboard.json, which
  * `python -m engine report` (and the daily GitHub Actions cycle) regenerates.
- * No build step, no framework — serve the frontend/ folder through any static
+ * No build step, no framework. Serve the frontend/ folder through any static
  * server; fetch() does not work from file://.
  */
 
@@ -19,19 +19,19 @@ function esc(value) {
 }
 
 function fmt(value, digits = 5) {
-  if (value === null || value === undefined || value === "") return "—";
+  if (value === null || value === undefined || value === "") return "n/a";
   const n = Number(value);
-  return Number.isFinite(n) ? n.toFixed(digits) : "—";
+  return Number.isFinite(n) ? n.toFixed(digits) : "n/a";
 }
 
 function fmtPct(value) {
   const n = Number(value);
-  return Number.isFinite(n) ? `${n.toFixed(1)}%` : "—";
+  return Number.isFinite(n) ? `${n.toFixed(1)}%` : "n/a";
 }
 
 /* Keep the raw ISO value in datetime= so timestamps stay machine-readable. */
 function when(value) {
-  if (!value) return "—";
+  if (!value) return "n/a";
   return `<time datetime="${esc(value)}">${esc(value)}</time>`;
 }
 
@@ -83,7 +83,7 @@ function statusChip(status) {
   return `<span class="chip ${STATUS_CLASS[key] || "na"}">${esc(status || "unknown")}</span>`;
 }
 
-/* Rules must sort R1..R13 — a plain localeCompare puts R10 before R2. */
+/* Rules must sort R1..R13; a plain localeCompare puts R10 before R2. */
 function ruleRank(rule) {
   const n = Number.parseInt(String(rule ?? "").replace(/[^0-9]/g, ""), 10);
   return Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
@@ -164,7 +164,7 @@ function hydrateChrome(data) {
   const gen = data.generated_at;
   const fresh = freshness(gen);
   mount("head-meta",
-    `rulebook v${esc(data.rules_version ?? "—")}` +
+    (data.rules_version ? `rulebook v${esc(data.rules_version)}` : "rulebook version unknown") +
     (gen ? ` · generated ${esc(gen)}` : "") +
     (fresh ? ` · <span class="freshness ${fresh.cls}" title="dashboard generated ${esc(gen)}">${esc(fresh.text)}</span>` : ""));
   mount("foot-generated",
@@ -224,10 +224,10 @@ function renderIndex(data) {
 
   mount("engine-config", `
     <div class="kv">
-      <span class="k">max coder attempts / cycle</span><span class="v">${esc(engine.max_attempts ?? "—")}</span>
-      <span class="k">notebook timeout</span><span class="v">${engine.notebook_timeout != null ? esc(engine.notebook_timeout) + "s" : "—"}</span>
-      <span class="k">coder model</span><span class="v">${esc(engine.opencode_model ?? "—")}</span>
-      <span class="k">coder agent</span><span class="v">${esc(engine.opencode_agent ?? "—")}</span>
+      <span class="k">max coder attempts / cycle</span><span class="v">${esc(engine.max_attempts ?? "n/a")}</span>
+      <span class="k">notebook timeout</span><span class="v">${engine.notebook_timeout != null ? esc(engine.notebook_timeout) + "s" : "n/a"}</span>
+      <span class="k">coder model</span><span class="v">${esc(engine.opencode_model ?? "n/a")}</span>
+      <span class="k">coder agent</span><span class="v">${esc(engine.opencode_agent ?? "n/a")}</span>
       <span class="k">kaggle auth ready</span><span class="v">${engine.kaggle_auth_ready ? chip("pass") + " ready" : chip("fail") + " missing credentials"}</span>
       <span class="k">submissions enabled</span><span class="v">${engine.submit_enabled ? chip("warn") + " enabled" : chip("na") + " disabled (R9)"}</span>
       <span class="k">vercel sync</span><span class="v">${engine.vercel_sync ? chip("info") + " configured" : chip("na") + " not configured"}</span>
@@ -246,13 +246,13 @@ function renderIndex(data) {
          <span class="k">finished</span><span class="v">${when(last.finished_at)}</span>
        </div>
        <div class="panel-foot"><a href="competitions.html#recent-runs">all recorded runs →</a></div>`
-    : '<div class="state">No runs yet — start one with <code>python -m engine cycle</code>.</div>');
+    : '<div class="state">No runs yet. Start one with <code>python -m engine cycle</code>.</div>');
 }
 
 /* ---------- page: competitions ------------------------------------------------------ */
 
-/* Seven checkpoint chips — 1 datasets · 2 statement · 3 coded · 4 trained ·
-   5 scored · 6 gate · 7 submitted — driven by comp.stages from the engine's
+/* Seven checkpoint chips (1 datasets, 2 statement, 3 coded, 4 trained,
+   5 scored, 6 gate, 7 submitted), driven by comp.stages from the engine's
    report feed. Absent stages (older feed) render nothing. */
 function stageStrip(comp) {
   const s = comp.stages;
@@ -261,8 +261,8 @@ function stageStrip(comp) {
   const gateWhy = s.gate === true
     ? "measured OOF score has reached the target gate (R7)"
     : s.gate === false
-      ? "gate defined but not reached yet — the feedback loop keeps improving"
-      : "no gate verdict yet — run a cycle to measure against the target";
+      ? "gate defined but not reached yet. The feedback loop keeps improving"
+      : "no gate verdict yet. Run a cycle to measure against the target";
   const items = [
     ["1 datasets", s.datasets ? "pass" : "na", "kaggle data extracted under datasets/"],
     ["2 statement", s.statement ? "pass" : "na", "PROBLEM_STATEMENT.md fetched from kaggle"],
@@ -284,7 +284,7 @@ function compCard(comp) {
   const gapLarge = gapLooksLarge(comp);
   const gapClass = gapLarge ? " v-warn" : "";
   const gapTitle = gapLarge
-    ? ' title="gap beyond 2x CV std — diagnose the split before adding models (R5)"'
+    ? ' title="gap beyond 2x CV std. Diagnose the split before adding models (R5)"'
     : "";
 
   const passed = checks.filter((c) => c.status === "pass").length;
@@ -315,7 +315,7 @@ function compCard(comp) {
     <div class="scores">
       <div><div class="k">OOF ${esc(comp.metric || "")}</div><div class="v${oofClass}">${fmt(comp.cv_mean)}</div></div>
       <div><div class="k">± std</div><div class="v">${fmt(comp.cv_std)}</div></div>
-      <div><div class="k">gate</div><div class="v">${comp.target_score == null ? "—" : fmt(comp.target_score)}</div></div>
+      <div><div class="k">gate</div><div class="v">${fmt(comp.target_score)}</div></div>
       <div><div class="k">public LB</div><div class="v">${fmt(comp.lb_score)}</div></div>
       <div><div class="k">gap (LB−OOF)</div><div class="v${gapClass}"${gapTitle}>${fmt(comp.gap)}</div></div>
       <div><div class="k">attempts</div><div class="v">${esc(comp.attempts ?? 0)}</div></div>
@@ -324,7 +324,7 @@ function compCard(comp) {
     <div class="gate">
       <progress class="prog ${meterTone}" max="100" value="${attain.clamped.toFixed(1)}"
                 aria-label="OOF score progress toward the score gate"></progress>
-      <div class="gate-label">OOF ${fmt(comp.cv_mean)} vs gate ${fmt(comp.target_score)} — ${fmtPct(attain.raw)} of target</div>
+      <div class="gate-label">OOF ${fmt(comp.cv_mean)} vs gate ${fmt(comp.target_score)}, ${fmtPct(attain.raw)} of target</div>
     </div>` : ""}
     ${stageStrip(comp)}
     <div class="checks-row">
@@ -333,7 +333,7 @@ function compCard(comp) {
         `<span class="chip ${CHIP_CLASS[c.status] || "info"}" title="${esc(c.detail)}">${esc(c.rule)} ${esc(c.status)}</span>`
       ).join("")}
     </div>
-    ${(comp.notes || []).map((n) => `<div class="note">⚠ ${esc(n)}</div>`).join("")}
+    ${(comp.notes || []).map((n) => `<div class="note">${esc(n)}</div>`).join("")}
     <div class="links">${links.map(([label, href]) =>
       `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(label)} <span aria-hidden="true">↗</span></a>`).join("")}</div>
   </div>`;
@@ -431,7 +431,7 @@ function renderRequirements(data) {
   const comps = data.competitions || [];
   const rules = data.requirements || [];
   if (!comps.length || !rules.length) {
-    mount("matrix", '<div class="state">Nothing to show yet — run a cycle first.</div>');
+    mount("matrix", '<div class="state">Nothing to show yet. Run a cycle first.</div>');
     return;
   }
 
@@ -521,15 +521,15 @@ function renderRules(data) {
       </div>
       <p>${esc(r.text)}</p>
     </article>`).join("")}`
-    : '<div class="state">No rulebook loaded — regenerate <code>data/dashboard.json</code>.</div>');
+    : '<div class="state">No rulebook loaded. Regenerate <code>data/dashboard.json</code>.</div>');
 
   const engine = data.engine || {};
   mount("engine-rules", `
     <div class="kv">
-      <span class="k">max attempts per cycle</span><span class="v">${esc(engine.max_attempts ?? "—")}</span>
-      <span class="k">notebook timeout</span><span class="v">${engine.notebook_timeout != null ? esc(engine.notebook_timeout) + "s" : "—"}</span>
-      <span class="k">submissions</span><span class="v">${engine.submit_enabled ? "enabled" : "disabled — ENGINE_SUBMIT_ENABLED=1 required (R9)"}</span>
-      <span class="k">credentials</span><span class="v">env / ~/.kaggle/kaggle.json only — never in the database (R12)</span>
+      <span class="k">max attempts per cycle</span><span class="v">${esc(engine.max_attempts ?? "n/a")}</span>
+      <span class="k">notebook timeout</span><span class="v">${engine.notebook_timeout != null ? esc(engine.notebook_timeout) + "s" : "n/a"}</span>
+      <span class="k">submissions</span><span class="v">${engine.submit_enabled ? "enabled" : "disabled: ENGINE_SUBMIT_ENABLED=1 required (R9)"}</span>
+      <span class="k">credentials</span><span class="v">env or ~/.kaggle/kaggle.json only, never in the database (R12)</span>
       <span class="k">sync</span><span class="v">${engine.vercel_sync ? "dashboard projection pushed to Vercel endpoint" : "no Vercel endpoint configured"}</span>
     </div>`);
 }
@@ -570,7 +570,7 @@ document.addEventListener("click", (e) => {
   const text = btn.closest(".rule") ? btn.closest(".rule").querySelector("p").textContent.trim() : "";
   if (!text) return;
   copyText(text)
-    .then(() => flashLabel(btn, "copied ✓"))
+    .then(() => flashLabel(btn, "copied"))
     .catch(() => flashLabel(btn, "copy failed"));
 });
 
@@ -582,9 +582,14 @@ function mountRoot(html) {
   document.querySelector("main.wrap")?.insertAdjacentHTML("afterbegin", html);
 }
 
+/* Static pages (privacy, terms) share this file for chrome hydration only:
+ * they carry no #root, so skeleton and error states must never mount there. */
+const DASHBOARD_PAGES = ["index", "competitions", "requirements", "rules"];
+
 async function boot() {
   markActiveNav();
-  mountRoot(SKELETON);
+  const isDashboard = DASHBOARD_PAGES.includes(PAGE);
+  if (isDashboard) mountRoot(SKELETON);
 
   let data;
   try {
@@ -597,25 +602,29 @@ async function boot() {
     try {
       data = await resp.json();
     } catch {
-      throw new Error("dashboard.json is not valid JSON — regenerate it with `python -m engine report`");
+      throw new Error("dashboard.json is not valid JSON. Regenerate it with `python -m engine report`");
     }
   } catch (err) {
-    mountRoot(`<div class="state error">
-      Could not load <code>data/dashboard.json</code> (${esc(err.message)}).
-      Generate it with <code>python -m engine report</code>, or serve the
-      <code>frontend/</code> folder through a static server (fetch() does not
-      work from <code>file://</code>).</div>`);
+    if (isDashboard) {
+      mountRoot(`<div class="state error">
+        Could not load <code>data/dashboard.json</code> (${esc(err.message)}).
+        Generate it with <code>python -m engine report</code>, or serve the
+        <code>frontend/</code> folder through a static server (fetch() does not
+        work from <code>file://</code>).</div>`);
+    }
     return;
   }
 
-  mountRoot("");
+  if (isDashboard) mountRoot("");
   try {
     hydrateChrome(data);
     ({ index: renderIndex, competitions: renderCompetitions,
        requirements: renderRequirements, rules: renderRules }[PAGE] || (() => {}))(data);
   } catch (err) {
-    mountRoot(`<div class="state error">
-      Loaded <code>data/dashboard.json</code>, but rendering failed (${esc(err.message)}).</div>`);
+    if (isDashboard) {
+      mountRoot(`<div class="state error">
+        Loaded <code>data/dashboard.json</code>, but rendering failed (${esc(err.message)}).</div>`);
+    }
   }
 }
 

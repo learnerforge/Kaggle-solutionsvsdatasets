@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#101426">
-  <title>Kaggle Solutions vs Datasets — Overview</title>
+  <title>Overview | Kaggle Solutions vs Datasets</title>
   <meta name="description" content="Engine-driven Kaggle competition solver: scout, OpenCode coder, score gate, full artifact trail.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF6D00'/%3E%3Ctext x='16' y='16' font-family='monospace' font-size='20' font-weight='bold' text-anchor='middle' dominant-baseline='central' fill='%23101426'%3EK%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="assets/style.css">
@@ -32,8 +32,8 @@
   <div id="root" role="status"></div>
   <noscript>
     <div class="state error">
-      This dashboard renders <code>data/dashboard.json</code> with JavaScript —
-      please enable it, or read the JSON directly.
+      This dashboard renders <code>data/dashboard.json</code> with JavaScript.
+      Please enable it, or read the JSON directly.
     </div>
   </noscript>
 
@@ -42,7 +42,7 @@
     <p class="lede">
       An engine that keeps one agent permanently briefed on each Kaggle competition
       (problem statement, evaluation metric, datasets, profile) and triggers OpenCode
-      to write the solution notebook every time it is asked — under a versioned
+      to write the solution notebook every time it is asked, under a versioned
       rulebook, gated on a score target, and leaving an artifact trail for every
       number it claims.
     </p>
@@ -89,12 +89,12 @@ Kaggle-solutionsvsdatasets/
 ├── competition/
 │   └── &lt;slug&gt;/
 │       ├── code/&lt;slug&gt;.ipynb    <- the only source artifact (R1)
-│       ├── datasets/           <- Kaggle CLI download — git-ignored (R12)
-│       ├── train/              <- metrics.json, submission.csv, oof, reports — git-ignored
+│       ├── datasets/           <- Kaggle CLI download, git-ignored (R12)
+│       ├── train/              <- metrics.json, submission.csv, oof, reports, git-ignored
 │       ├── PROBLEM_STATEMENT.md
 │       ├── BRIEF.md
 │       └── readme.md           <- algorithm walkthrough + score matching (R11)
-└── .engine/                    <- local SQLite state — git-ignored
+└── .engine/                    <- local SQLite state, git-ignored
 </pre>
   </div>
 
@@ -104,7 +104,10 @@ Kaggle-solutionsvsdatasets/
   <div class="wrap foot-inner">
     <span id="foot-generated"></span>
     <span class="foot-links">
-      <a data-repo-link href="#">source on GitHub</a>
+      <a data-repo-link href="https://github.com/learnerforge/Kaggle-solutionsvsdatasets">source on GitHub</a>
+      <a href="https://kaggle-solutions-dashboard.vercel.app">live site</a>
+      <a href="privacy.html">privacy</a>
+      <a href="terms.html">terms</a>
       <a class="to-top" href="#main">back to top ↑</a>
     </span>
   </div>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#101426">
-  <title>Rulebook — Kaggle Solutions vs Datasets</title>
+  <title>Rulebook | Kaggle Solutions vs Datasets</title>
   <meta name="description" content="The versioned rulebook the coding agent works under: folder contract, honesty, score gate, optimization ladder, security.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF6D00'/%3E%3Ctext x='16' y='16' font-family='monospace' font-size='20' font-weight='bold' text-anchor='middle' dominant-baseline='central' fill='%23101426'%3EK%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="assets/style.css">
@@ -32,8 +32,8 @@
   <div id="root" role="status"></div>
   <noscript>
     <div class="state error">
-      This dashboard renders <code>data/dashboard.json</code> with JavaScript —
-      please enable it, or read the JSON directly.
+      This dashboard renders <code>data/dashboard.json</code> with JavaScript.
+      Please enable it, or read the JSON directly.
     </div>
   </noscript>
 
@@ -57,7 +57,7 @@
   <div class="panel">
     <p class="intro">
       When a cycle misses the gate, the feedback sent back to the coder is ordered by
-      this ladder — evidence before capacity, measurement before modelling:
+      this ladder: evidence before capacity, measurement before modelling:
     </p>
     <ol class="pipeline">
       <li><span class="stage">1. Clean leak-free baseline</span>
@@ -65,11 +65,11 @@
       <li><span class="stage">2. Sanity-check folds and metric</span>
           <div class="desc">Fold variance, worst fold, metric implementation bugs.</div></li>
       <li><span class="stage">3. Domain feature engineering</span>
-          <div class="desc">From the problem statement — not from a feature list on the internet.</div></li>
+          <div class="desc">From the problem statement, not from a feature list on the internet.</div></li>
       <li><span class="stage">4. Model zoo</span>
           <div class="desc">LightGBM + XGBoost + CatBoost, each measured separately on OOF.</div></li>
       <li><span class="stage">5. OOF-fitted ensemble</span>
-          <div class="desc">Rank-mean for rank metrics; hill-climb weights otherwise — never fitted on test predictions.</div></li>
+          <div class="desc">Rank-mean for rank metrics; hill-climb weights otherwise, never fitted on test predictions.</div></li>
       <li><span class="stage">6. Fold-safe target encoding</span>
           <div class="desc">High-cardinality columns, encoded excluding each row's own fold.</div></li>
       <li><span class="stage">7. Pseudo-labelling</span>
@@ -84,7 +84,7 @@
     <div id="engine-rules"></div>
     <p class="outro">
       Kaggle credentials are resolved from environment variables or
-      <code>~/.kaggle/kaggle.json</code> — never from a shared database, never
+      <code>~/.kaggle/kaggle.json</code>, never from a shared database, never
       printed, never committed. If a Vercel database is attached later, it stores
       the dashboard projection only; credentials stay in Vercel Environment
       Variables and are served through a dedicated endpoint that the engine reads
@@ -100,7 +100,10 @@
   <div class="wrap foot-inner">
     <span id="foot-generated"></span>
     <span class="foot-links">
-      <a data-repo-link href="#">source on GitHub</a>
+      <a data-repo-link href="https://github.com/learnerforge/Kaggle-solutionsvsdatasets">source on GitHub</a>
+      <a href="https://kaggle-solutions-dashboard.vercel.app">live site</a>
+      <a href="privacy.html">privacy</a>
+      <a href="terms.html">terms</a>
       <a class="to-top" href="#main">back to top ↑</a>
     </span>
   </div>

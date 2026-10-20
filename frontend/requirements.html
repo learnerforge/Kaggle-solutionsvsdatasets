@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#101426">
-  <title>Requirements matrix — Kaggle Solutions vs Datasets</title>
+  <title>Requirements matrix | Kaggle Solutions vs Datasets</title>
   <meta name="description" content="Which rulebook requirements each competition satisfies, with evidence.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF6D00'/%3E%3Ctext x='16' y='16' font-family='monospace' font-size='20' font-weight='bold' text-anchor='middle' dominant-baseline='central' fill='%23101426'%3EK%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="assets/style.css">
@@ -32,8 +32,8 @@
   <div id="root" role="status"></div>
   <noscript>
     <div class="state error">
-      This dashboard renders <code>data/dashboard.json</code> with JavaScript —
-      please enable it, or read the JSON directly.
+      This dashboard renders <code>data/dashboard.json</code> with JavaScript.
+      Please enable it, or read the JSON directly.
     </div>
   </noscript>
 
@@ -42,15 +42,15 @@
     <p class="lede">
       The problem statement is satisfied when the rulebook is satisfied. Every cell
       below is produced by <code>python -m engine verify &lt;slug&gt;</code> from
-      evidence on disk — the folder contract, the notebook's structure, leakage
+      evidence on disk: the folder contract, the notebook's structure, leakage
       guards, git hygiene and the artifact trail. Structural failures always
       outrank scores: a notebook that cannot run is not a solution.
     </p>
     <p class="lede legend">
-      <span class="chip pass">pass — requirement met, evidence linked</span>
-      <span class="chip warn">warn — partial, review</span>
-      <span class="chip fail">fail — requirement violated</span>
-      <span class="chip na">n/a — not applicable yet</span>
+      <span class="chip pass">pass: requirement met, evidence linked</span>
+      <span class="chip warn">warn: partial, review</span>
+      <span class="chip fail">fail: requirement violated</span>
+      <span class="chip na">n/a: not applicable yet</span>
     </p>
     <div class="hero-actions">
       <a class="btn primary" href="competitions.html">Browse competitions</a>
@@ -70,7 +70,10 @@
   <div class="wrap foot-inner">
     <span id="foot-generated"></span>
     <span class="foot-links">
-      <a data-repo-link href="#">source on GitHub</a>
+      <a data-repo-link href="https://github.com/learnerforge/Kaggle-solutionsvsdatasets">source on GitHub</a>
+      <a href="https://kaggle-solutions-dashboard.vercel.app">live site</a>
+      <a href="privacy.html">privacy</a>
+      <a href="terms.html">terms</a>
       <a class="to-top" href="#main">back to top ↑</a>
     </span>
   </div>

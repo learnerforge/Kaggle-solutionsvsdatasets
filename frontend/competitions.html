@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#101426">
-  <title>Competitions — Kaggle Solutions vs Datasets</title>
+  <title>Competitions | Kaggle Solutions vs Datasets</title>
   <meta name="description" content="Every tracked competition: OOF score, gate status, leaderboard gap and requirement checks.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF6D00'/%3E%3Ctext x='16' y='16' font-family='monospace' font-size='20' font-weight='bold' text-anchor='middle' dominant-baseline='central' fill='%23101426'%3EK%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="assets/style.css">
@@ -32,8 +32,8 @@
   <div id="root" role="status"></div>
   <noscript>
     <div class="state error">
-      This dashboard renders <code>data/dashboard.json</code> with JavaScript —
-      please enable it, or read the JSON directly.
+      This dashboard renders <code>data/dashboard.json</code> with JavaScript.
+      Please enable it, or read the JSON directly.
     </div>
   </noscript>
 
@@ -41,7 +41,7 @@
     <h1>Competitions</h1>
     <p class="lede">
       One card per competition. <strong>OOF</strong> is the measured out-of-fold
-      score from <code>train/metrics.json</code> — never an estimate. The gap column
+      score from <code>train/metrics.json</code>, never an estimate. The gap column
       is public-leaderboard minus OOF; a large negative gap means the validation
       split is unrepresentative, which the rulebook makes diagnosable before any
       new model is added (R5).
@@ -64,7 +64,10 @@
   <div class="wrap foot-inner">
     <span id="foot-generated"></span>
     <span class="foot-links">
-      <a data-repo-link href="#">source on GitHub</a>
+      <a data-repo-link href="https://github.com/learnerforge/Kaggle-solutionsvsdatasets">source on GitHub</a>
+      <a href="https://kaggle-solutions-dashboard.vercel.app">live site</a>
+      <a href="privacy.html">privacy</a>
+      <a href="terms.html">terms</a>
       <a class="to-top" href="#main">back to top ↑</a>
     </span>
   </div>
