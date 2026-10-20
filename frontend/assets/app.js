@@ -206,11 +206,14 @@ function renderIndex(data) {
   const engine = data.engine || {};
   decorateTree();
 
+  const stageStats = stats.stages || {};
   const cards = [
     ["Competitions tracked", stats.competitions ?? 0, `${stats.tracked_on_disk ?? 0} folder(s) on disk`, ""],
     ["Gate reached", stats.gate_reached ?? 0, `${stats.gate_defined ?? 0} with a score gate defined`, (stats.gate_reached ?? 0) > 0 ? "pass" : ""],
     ["Runs recorded", stats.runs ?? 0, "scout / code / train attempts", (stats.runs ?? 0) > 0 ? "info" : ""],
     ["Solved", stats.solved ?? 0, "marked solved by the score gate", (stats.solved ?? 0) > 0 ? "pass" : ""],
+    ["Data landed", stageStats.datasets ?? 0, "kaggle datasets extracted (checkpoint 1)", (stageStats.datasets ?? 0) > 0 ? "pass" : ""],
+    ["Submissions", stageStats.submitted ?? 0, "logged by the engine (R9)", (stageStats.submitted ?? 0) > 0 ? "pass" : ""],
   ];
   mount("stats", cards.map(([label, value, sub, tone]) => `
     <div class="card">
@@ -247,6 +250,32 @@ function renderIndex(data) {
 }
 
 /* ---------- page: competitions ------------------------------------------------------ */
+
+/* Seven checkpoint chips — 1 datasets · 2 statement · 3 coded · 4 trained ·
+   5 scored · 6 gate · 7 submitted — driven by comp.stages from the engine's
+   report feed. Absent stages (older feed) render nothing. */
+function stageStrip(comp) {
+  const s = comp.stages;
+  if (!s) return "";
+  const gateCls = s.gate === true ? "pass" : s.gate === false ? "fail" : "na";
+  const gateWhy = s.gate === true
+    ? "measured OOF score has reached the target gate (R7)"
+    : s.gate === false
+      ? "gate defined but not reached yet — the feedback loop keeps improving"
+      : "no gate verdict yet — run a cycle to measure against the target";
+  const items = [
+    ["1 datasets", s.datasets ? "pass" : "na", "kaggle data extracted under datasets/"],
+    ["2 statement", s.statement ? "pass" : "na", "PROBLEM_STATEMENT.md fetched from kaggle"],
+    ["3 coded", s.coded ? "pass" : "na", "the engine coder has produced code for this competition"],
+    ["4 trained", s.trained ? "pass" : "na", "train/metrics.json written by a full notebook run (R4)"],
+    ["5 scored", s.scored ? "pass" : "na", "OOF score measured on held-out folds"],
+    ["6 gate", gateCls, gateWhy],
+    ["7 submitted", s.submitted ? "pass" : "na", "submission logged by the engine (R9)"],
+  ];
+  return `<div class="stages-row" role="group" aria-label="checkpoint progress">${items
+    .map(([label, cls, why]) => `<span class="chip ${cls}" title="${esc(why)}">${esc(label)}</span>`)
+    .join("")}</div>`;
+}
 
 function compCard(comp) {
   const checks = ruleOrder(comp.checks);
@@ -297,6 +326,7 @@ function compCard(comp) {
                 aria-label="OOF score progress toward the score gate"></progress>
       <div class="gate-label">OOF ${fmt(comp.cv_mean)} vs gate ${fmt(comp.target_score)} — ${fmtPct(attain.raw)} of target</div>
     </div>` : ""}
+    ${stageStrip(comp)}
     <div class="checks-row">
       <span class="chip ${summaryTone} summary" title="rules checked and passing for this competition">${esc(summaryText)}</span>
       ${checks.map((c) =>

@@ -32,6 +32,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import threading
 import time
 from dataclasses import dataclass
@@ -158,7 +159,7 @@ def _invoke(cmd: list[str], *, timeout: int, log, label: str,
             break
         if now >= next_beat:
             print(f"[opencode] {label} running ({now - started:.0f}s / {timeout}s)",
-                  flush=True)
+                  file=sys.stderr, flush=True)
             next_beat = now + 30
         time.sleep(0.5)
 
@@ -239,7 +240,8 @@ def run(
             if try_no > 1:
                 log.write(f"\n----- RETRY {try_no}/{tries} (previous: {error}) -----\n\n")
                 log.flush()
-                print(f"[opencode] {label}: retrying after failure — {error}", flush=True)
+                print(f"[opencode] {label}: retrying after failure — {error}",
+                      file=sys.stderr, flush=True)
             (returncode, text, session_id, duration, error, timed_out) = _invoke(
                 cmd, timeout=timeout, log=log, label=label, cwd=settings.repo_root,
             )

@@ -370,6 +370,8 @@ table.data tbody tr:hover { background: rgba(31, 37, 66, 0.6); }
 .comp .scores .v.v-warn { color: var(--warn); }
 
 .comp .checks-row { display: flex; gap: 5px; flex-wrap: wrap; }
+.comp .stages-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+.comp .stages-row .chip { font-size: 11px; padding: 1px 8px; }
 .comp .links { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13.5px; }
 .comp .note { color: var(--warn); font-size: 13px; }
 

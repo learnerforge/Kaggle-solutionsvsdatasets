@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T06:10:08+00:00",
+  "generated_at": "2026-10-20T06:42:59+00:00",
   "rules_version": "1.1.0",
   "repo_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets",
   "engine": {
@@ -25,7 +25,16 @@
     },
     "gate_reached": 0,
     "tracked_on_disk": 3,
-    "gate_defined": 2
+    "gate_defined": 2,
+    "stages": {
+      "datasets": 0,
+      "statement": 3,
+      "coded": 2,
+      "trained": 0,
+      "scored": 0,
+      "submitted": 0,
+      "gate": 0
+    }
   },
   "competitions": [
     {
@@ -53,6 +62,15 @@
       "notebook_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/house-prices-advanced-regression-techniques/code/house-prices-advanced-regression-techniques.ipynb",
       "problem_statement_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/house-prices-advanced-regression-techniques/PROBLEM_STATEMENT.md",
       "brief_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/house-prices-advanced-regression-techniques/BRIEF.md",
+      "stages": {
+        "datasets": false,
+        "statement": true,
+        "coded": false,
+        "trained": false,
+        "scored": false,
+        "gate": null,
+        "submitted": false
+      },
       "checks": [
         {
           "rule": "R1",
@@ -143,6 +161,15 @@
       "notebook_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/code/nlp-getting-started.ipynb",
       "problem_statement_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/PROBLEM_STATEMENT.md",
       "brief_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/BRIEF.md",
+      "stages": {
+        "datasets": false,
+        "statement": true,
+        "coded": true,
+        "trained": false,
+        "scored": false,
+        "gate": null,
+        "submitted": false
+      },
       "checks": [
         {
           "rule": "R1",
@@ -253,6 +280,15 @@
       "notebook_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/code/playground-series-s6e2.ipynb",
       "problem_statement_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/PROBLEM_STATEMENT.md",
       "brief_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/BRIEF.md",
+      "stages": {
+        "datasets": false,
+        "statement": true,
+        "coded": true,
+        "trained": false,
+        "scored": false,
+        "gate": null,
+        "submitted": false
+      },
       "checks": [
         {
           "rule": "R1",

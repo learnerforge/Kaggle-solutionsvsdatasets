@@ -112,6 +112,31 @@ def write_attempt_report(slug: str, *, attempt: int, checks: dict | None,
     return path
 
 
+def _stages(slug: str, report, history: list[dict], settings: Settings) -> dict:
+    """Checkpoint readiness for this competition (the frontend stage chips).
+
+    One key per mission checkpoint, evidence-based and never optimistic:
+    filesystem facts (data, statement, metrics artefacts) or store rows
+    (coder attempts, submissions). ``gate`` is tri-state — None until a
+    verdict exists, then True/False from the scorer.
+    """
+    datasets = settings.datasets_dir(slug)
+    has_data = datasets.is_dir() and any(
+        p.is_file() and p.suffix.lower() in {".csv", ".parquet"}
+        for p in datasets.rglob("*"))
+    statement = settings.competition_dir(slug) / "PROBLEM_STATEMENT.md"
+    return {
+        "datasets": has_data,
+        "statement": statement.is_file() and statement.stat().st_size > 200,
+        "coded": (settings.code_path(slug).is_file()
+                  and any(row.get("phase") == "code" for row in history)),
+        "trained": scorer.metrics_path(slug, settings).is_file(),
+        "scored": report.cv_mean is not None,
+        "gate": report.reached,
+        "submitted": bool(store.submissions(slug, settings)),
+    }
+
+
 def _competition_view(slug: str, settings: Settings) -> dict:
     comp = store.get_competition(slug, settings) or {"slug": slug}
     report = scorer.evaluate(slug, settings=settings)
@@ -151,6 +176,7 @@ def _competition_view(slug: str, settings: Settings) -> dict:
         "notebook_url": f"{base}/blob/main/competition/{slug}/code/{slug}.ipynb",
         "problem_statement_url": f"{base}/blob/main/competition/{slug}/PROBLEM_STATEMENT.md",
         "brief_url": f"{base}/blob/main/competition/{slug}/BRIEF.md",
+        "stages": _stages(slug, report, history, settings),
         "checks": checks.get("checks", []),
         "checks_failed": checks.get("failed", []),
         "checks_passed": checks.get("passed", False),
@@ -185,6 +211,11 @@ def build_dashboard(settings: Settings | None = None) -> dict:
         "gate_reached": len(solved),
         "tracked_on_disk": len(on_disk),
         "gate_defined": sum(1 for c in competitions if c["target_score"] is not None),
+        "stages": {
+            key: sum(1 for c in competitions if c["stages"][key])
+            for key in ("datasets", "statement", "coded", "trained", "scored",
+                        "submitted")
+        } | {"gate": sum(1 for c in competitions if c["stages"]["gate"] is True)},
     })
 
     try:

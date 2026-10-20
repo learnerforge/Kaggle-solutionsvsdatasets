@@ -16,6 +16,7 @@ network means the brief still contains whatever is on disk, plus a warning.
 from __future__ import annotations
 
 import json
+import sys
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -171,7 +172,8 @@ def scout(
             def _on_wait(attempt: int, remaining: int) -> None:
                 print(f"[scout] rules not accepted yet — waiting for the join "
                       f"({remaining}s left, attempt {attempt}); accept them at "
-                      f"https://www.kaggle.com/competitions/{slug}", flush=True)
+                      f"https://www.kaggle.com/competitions/{slug}",
+                      file=sys.stderr, flush=True)
 
             try:
                 KaggleClient(settings).download(slug, datasets_dir,

@@ -16,6 +16,7 @@ Design rules encoded here:
 from __future__ import annotations
 
 import json
+import sys
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -41,7 +42,9 @@ class CycleOutcome:
 def _log(outcome: CycleOutcome, message: str) -> None:
     stamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
     outcome.log.append(f"[{stamp}] {message}")
-    print(f"[{stamp}] {message}")
+    # live stream on stderr: the CLI prints the human/JSON payload on stdout,
+    # so echoing the log there as well would duplicate every cycle line
+    print(f"[{stamp}] {message}", file=sys.stderr, flush=True)
 
 
 def ensure_scaffold(slug: str, *, title: str | None = None, target: str | None = None,

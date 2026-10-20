@@ -290,7 +290,9 @@ def cmd_cycle(args: argparse.Namespace) -> int:
         target=args.target, dry_run=args.dry_run, wait_join=args.wait,
         settings=settings,
     )
-    human = "\n".join(outcome.log + ["", f"result: {outcome.status}"])
+    # the log lines were already streamed live to stderr as they happened —
+    # reprinting them here doubled every cycle line in the terminal
+    human = f"result: {outcome.status}"
     return _emit(outcome.as_dict(), args.json, human)
 
 
