@@ -1,20 +1,15 @@
-# Competition brief — House Prices: Advanced Regression Techniques
+# Competition brief — house-prices-advanced-regression-techniques
 
 * Kaggle: <https://www.kaggle.com/competitions/house-prices-advanced-regression-techniques>
 * Slug: `house-prices-advanced-regression-techniques`
 * Detected metric: `rmse` (lower is better)
-* Target column: `SalePrice`
-* Score gate: `0.125`
-* Gathered: 2026-10-19T11:31:02+00:00
+* Target column: `unknown`
+* Score gate: `not set`
+* Gathered: 2026-10-20T08:39:58+00:00
 
 ## Files
 
-| file | size (bytes) |
-| --- | --- |
-| `data_description.txt` | 13370 |
-| `sample_submission.csv` | 31939 |
-| `test.csv` | 451405 |
-| `train.csv` | 460676 |
+_No file list available (offline or not authenticated)._
 
 ## Dataset profile
 
@@ -22,8 +17,44 @@ _No CSVs found._
 
 ## Warnings
 
-* Dataset download failed: `kaggle competitions download house-prices-advanced-regression-techniques --path` failed (exit 1): 403 Client Error: Forbidden for url: https://api.kaggle.com/v1/competitions.CompetitionApiService/DownloadDataFiles
-Hint: the competition rules are not accepted for this account. Join/accept in the browser at https://www.kaggle.com/competitions/house-prices-advanced-regression-techniques — no CLI command can do this (the API token alone is not enough). Then re-run; `scout`/`cycle --wait N` will poll for the join automatically.
+* Kaggle file list unavailable: `kaggle competitions files house-prices-advanced-regression-techniques --page-size` failed (exit 1): Authentication required to call the Kaggle API.
+
+First, you will need a Kaggle account. You can sign up at
+  https://www.kaggle.com/account/login
+
+Recommended: log in with OAuth via a web-based authorization flow.
+No token to manage; credentials are cached locally for you.
+    kaggle auth login
+
+If you'd rather not use OAuth, generate an API token at
+  https://www.kaggle.com/settings/api  (click "Generate New Token" under "API")
+and supply it to the CLI in one of these ways:
+
+  Option A: Environment variable
+    export KAGGLE_API_TOKEN=xxxxxxxxxxxxxx  # token copied from the settings UI
+
+  Option B: API token file
+    Save the token to ~/.kaggle/access_token
+Hint: credentials missing or expired. Run `kaggle auth login` or set KAGGLE_USERNAME / KAGGLE_KEY (see engine/secrets.py).
+* Dataset download failed: `kaggle competitions download house-prices-advanced-regression-techniques --path` failed (exit 1): Authentication required to call the Kaggle API.
+
+First, you will need a Kaggle account. You can sign up at
+  https://www.kaggle.com/account/login
+
+Recommended: log in with OAuth via a web-based authorization flow.
+No token to manage; credentials are cached locally for you.
+    kaggle auth login
+
+If you'd rather not use OAuth, generate an API token at
+  https://www.kaggle.com/settings/api  (click "Generate New Token" under "API")
+and supply it to the CLI in one of these ways:
+
+  Option A: Environment variable
+    export KAGGLE_API_TOKEN=xxxxxxxxxxxxxx  # token copied from the settings UI
+
+  Option B: API token file
+    Save the token to ~/.kaggle/access_token
+Hint: credentials missing or expired. Run `kaggle auth login` or set KAGGLE_USERNAME / KAGGLE_KEY (see engine/secrets.py).
 
 ## Problem statement
 

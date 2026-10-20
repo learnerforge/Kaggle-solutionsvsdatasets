@@ -1,35 +1,30 @@
 {
-  "generated_at": "2026-10-20T06:42:59+00:00",
+  "generated_at": "2026-10-20T08:39:59+00:00",
   "rules_version": "1.1.0",
   "repo_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets",
   "engine": {
     "max_attempts": 3,
-    "notebook_timeout": 3600,
+    "notebook_timeout": 5400,
     "opencode_model": "default",
     "opencode_agent": "default",
     "opencode_retries": 1,
     "submit_enabled": false,
     "submit_daily_limit": 5,
-    "kaggle_auth_ready": true,
+    "kaggle_auth_ready": false,
     "vercel_sync": false
   },
   "stats": {
-    "competitions": 3,
-    "runs": 7,
+    "competitions": 1,
+    "runs": 0,
     "solved": 0,
-    "last_run": {
-      "slug": "house-prices-advanced-regression-techniques",
-      "phase": "ask",
-      "status": "done",
-      "finished_at": "2026-10-20T06:07:17+00:00"
-    },
+    "last_run": null,
     "gate_reached": 0,
     "tracked_on_disk": 3,
-    "gate_defined": 2,
+    "gate_defined": 0,
     "stages": {
       "datasets": 0,
       "statement": 3,
-      "coded": 2,
+      "coded": 0,
       "trained": 0,
       "scored": 0,
       "submitted": 0,
@@ -39,12 +34,12 @@
   "competitions": [
     {
       "slug": "house-prices-advanced-regression-techniques",
-      "title": "House Prices: Advanced Regression Techniques",
+      "title": "house-prices-advanced-regression-techniques",
       "url": "https://www.kaggle.com/competitions/house-prices-advanced-regression-techniques",
       "metric": "rmse",
       "task": null,
       "higher_is_better": false,
-      "target_score": 0.125,
+      "target_score": null,
       "cv_mean": null,
       "cv_std": null,
       "cv_folds": [],
@@ -56,8 +51,8 @@
         "train/metrics.json missing \u2014 nothing measured yet (rule R4)"
       ],
       "status": "registered",
-      "attempts": 1,
-      "last_attempt_at": "2026-10-20T06:07:17+00:00",
+      "attempts": 0,
+      "last_attempt_at": null,
       "readme_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/house-prices-advanced-regression-techniques/readme.md",
       "notebook_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/house-prices-advanced-regression-techniques/code/house-prices-advanced-regression-techniques.ipynb",
       "problem_statement_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/house-prices-advanced-regression-techniques/PROBLEM_STATEMENT.md",
@@ -123,143 +118,13 @@
       ],
       "checks_failed": [],
       "checks_passed": true,
-      "history": [
-        {
-          "attempt": 0,
-          "phase": "ask",
-          "status": "done",
-          "cv_mean": null,
-          "lb_score": null,
-          "score_reached": null,
-          "finished_at": "2026-10-20T06:07:17+00:00",
-          "notes": "Reply with exactly the single word PONG and nothing else. Do not read any files."
-        }
-      ]
+      "history": []
     },
     {
       "slug": "nlp-getting-started",
-      "title": "NLP with Disaster Tweets",
+      "title": "nlp-getting-started",
       "url": "https://www.kaggle.com/competitions/nlp-getting-started",
-      "metric": "f1",
-      "task": null,
-      "higher_is_better": true,
-      "target_score": 0.75,
-      "cv_mean": null,
-      "cv_std": null,
-      "cv_folds": [],
-      "oof_score": null,
-      "lb_score": null,
-      "gap": null,
-      "reached": null,
-      "notes": [
-        "train/metrics.json missing \u2014 nothing measured yet (rule R4)"
-      ],
-      "status": "registered",
-      "attempts": 3,
-      "last_attempt_at": "2026-10-19T11:35:27+00:00",
-      "readme_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/readme.md",
-      "notebook_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/code/nlp-getting-started.ipynb",
-      "problem_statement_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/PROBLEM_STATEMENT.md",
-      "brief_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/BRIEF.md",
-      "stages": {
-        "datasets": false,
-        "statement": true,
-        "coded": true,
-        "trained": false,
-        "scored": false,
-        "gate": null,
-        "submitted": false
-      },
-      "checks": [
-        {
-          "rule": "R1",
-          "title": "Folder contract",
-          "status": "pass",
-          "detail": "code/<slug>.ipynb, datasets/, train/ and readme.md all present."
-        },
-        {
-          "rule": "R10",
-          "title": "Legacy folder untouched",
-          "status": "pass",
-          "detail": "no reference to the legacy workspace"
-        },
-        {
-          "rule": "R2",
-          "title": "Notebook runs top-to-bottom",
-          "status": "pass",
-          "detail": "10 code cells, valid nbformat v4"
-        },
-        {
-          "rule": "R3",
-          "title": "Determinism",
-          "status": "pass",
-          "detail": "SEED constant=yes, seeding calls=5"
-        },
-        {
-          "rule": "R6",
-          "title": "Leakage discipline",
-          "status": "pass",
-          "detail": "folds=yes, OOF completeness assert=yes"
-        },
-        {
-          "rule": "R9",
-          "title": "No uploads from the notebook",
-          "status": "pass",
-          "detail": "notebook never submits"
-        },
-        {
-          "rule": "R12",
-          "title": "Security and git hygiene",
-          "status": "pass",
-          "detail": "no credential patterns; no datasets or train artifacts tracked"
-        },
-        {
-          "rule": "R11",
-          "title": "README write-up",
-          "status": "pass",
-          "detail": "5/5 required sections present (R11)"
-        }
-      ],
-      "checks_failed": [],
-      "checks_passed": true,
-      "history": [
-        {
-          "attempt": 3,
-          "phase": "code",
-          "status": "dry_run",
-          "cv_mean": null,
-          "lb_score": null,
-          "score_reached": null,
-          "finished_at": "2026-10-19T11:35:27+00:00",
-          "notes": "dry-run: opencode not invoked"
-        },
-        {
-          "attempt": 2,
-          "phase": "code",
-          "status": "dry_run",
-          "cv_mean": null,
-          "lb_score": null,
-          "score_reached": null,
-          "finished_at": "2026-10-19T11:35:27+00:00",
-          "notes": "dry-run: opencode not invoked"
-        },
-        {
-          "attempt": 1,
-          "phase": "code",
-          "status": "dry_run",
-          "cv_mean": null,
-          "lb_score": null,
-          "score_reached": null,
-          "finished_at": "2026-10-19T11:35:27+00:00",
-          "notes": "dry-run: opencode not invoked"
-        }
-      ]
-    },
-    {
-      "slug": "playground-series-s6e2",
-      "title": "Predicting Heart Disease",
-      "url": "https://www.kaggle.com/competitions/playground-series-s6e2",
-      "metric": "roc_auc",
+      "metric": null,
       "task": null,
       "higher_is_better": true,
       "target_score": null,
@@ -274,16 +139,16 @@
         "train/metrics.json missing \u2014 nothing measured yet (rule R4)"
       ],
       "status": "registered",
-      "attempts": 3,
-      "last_attempt_at": "2026-10-19T07:19:24+00:00",
-      "readme_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/readme.md",
-      "notebook_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/code/playground-series-s6e2.ipynb",
-      "problem_statement_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/PROBLEM_STATEMENT.md",
-      "brief_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/BRIEF.md",
+      "attempts": 0,
+      "last_attempt_at": null,
+      "readme_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/readme.md",
+      "notebook_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/code/nlp-getting-started.ipynb",
+      "problem_statement_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/PROBLEM_STATEMENT.md",
+      "brief_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/nlp-getting-started/BRIEF.md",
       "stages": {
         "datasets": false,
         "statement": true,
-        "coded": true,
+        "coded": false,
         "trained": false,
         "scored": false,
         "gate": null,
@@ -341,38 +206,95 @@
       ],
       "checks_failed": [],
       "checks_passed": true,
-      "history": [
+      "history": []
+    },
+    {
+      "slug": "playground-series-s6e2",
+      "title": "playground-series-s6e2",
+      "url": "https://www.kaggle.com/competitions/playground-series-s6e2",
+      "metric": null,
+      "task": null,
+      "higher_is_better": true,
+      "target_score": null,
+      "cv_mean": null,
+      "cv_std": null,
+      "cv_folds": [],
+      "oof_score": null,
+      "lb_score": null,
+      "gap": null,
+      "reached": null,
+      "notes": [
+        "train/metrics.json missing \u2014 nothing measured yet (rule R4)"
+      ],
+      "status": "registered",
+      "attempts": 0,
+      "last_attempt_at": null,
+      "readme_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/readme.md",
+      "notebook_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/code/playground-series-s6e2.ipynb",
+      "problem_statement_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/PROBLEM_STATEMENT.md",
+      "brief_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/playground-series-s6e2/BRIEF.md",
+      "stages": {
+        "datasets": false,
+        "statement": true,
+        "coded": false,
+        "trained": false,
+        "scored": false,
+        "gate": null,
+        "submitted": false
+      },
+      "checks": [
         {
-          "attempt": 3,
-          "phase": "code",
-          "status": "dry_run",
-          "cv_mean": null,
-          "lb_score": null,
-          "score_reached": null,
-          "finished_at": "2026-10-19T07:19:24+00:00",
-          "notes": "dry-run: opencode not invoked"
+          "rule": "R1",
+          "title": "Folder contract",
+          "status": "pass",
+          "detail": "code/<slug>.ipynb, datasets/, train/ and readme.md all present."
         },
         {
-          "attempt": 2,
-          "phase": "code",
-          "status": "dry_run",
-          "cv_mean": null,
-          "lb_score": null,
-          "score_reached": null,
-          "finished_at": "2026-10-19T07:19:24+00:00",
-          "notes": "dry-run: opencode not invoked"
+          "rule": "R10",
+          "title": "Legacy folder untouched",
+          "status": "pass",
+          "detail": "no reference to the legacy workspace"
         },
         {
-          "attempt": 1,
-          "phase": "code",
-          "status": "dry_run",
-          "cv_mean": null,
-          "lb_score": null,
-          "score_reached": null,
-          "finished_at": "2026-10-19T07:19:24+00:00",
-          "notes": "dry-run: opencode not invoked"
+          "rule": "R2",
+          "title": "Notebook runs top-to-bottom",
+          "status": "pass",
+          "detail": "10 code cells, valid nbformat v4"
+        },
+        {
+          "rule": "R3",
+          "title": "Determinism",
+          "status": "pass",
+          "detail": "SEED constant=yes, seeding calls=5"
+        },
+        {
+          "rule": "R6",
+          "title": "Leakage discipline",
+          "status": "pass",
+          "detail": "folds=yes, OOF completeness assert=yes"
+        },
+        {
+          "rule": "R9",
+          "title": "No uploads from the notebook",
+          "status": "pass",
+          "detail": "notebook never submits"
+        },
+        {
+          "rule": "R12",
+          "title": "Security and git hygiene",
+          "status": "pass",
+          "detail": "no credential patterns; no datasets or train artifacts tracked"
+        },
+        {
+          "rule": "R11",
+          "title": "README write-up",
+          "status": "pass",
+          "detail": "5/5 required sections present (R11)"
         }
-      ]
+      ],
+      "checks_failed": [],
+      "checks_passed": true,
+      "history": []
     }
   ],
   "requirements": [
