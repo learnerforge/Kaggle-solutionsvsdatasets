@@ -275,4 +275,5 @@ def run_ask(slug: str, question: str, *, settings: Settings | None = None,
                      log_path=str(result.log_path) if result.log_path else None,
                      notes=question[:500], settings=settings)
     return {"dry_run": False, "prompt_path": question_path, "answer": result.text,
-            "session_id": result.session_id, "ok": result.ok, "error": result.error}
+            "session_id": result.session_id, "ok": result.ok, "error": result.error,
+            "log_path": result.log_path}

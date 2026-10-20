@@ -65,6 +65,7 @@ See `.env.example`. The important ones:
 | `ENGINE_OPENCODE_RETRIES` | extra tries after a transient coder failure | `1` |
 | `ENGINE_OPENCODE_MODEL` / `ENGINE_OPENCODE_AGENT` | what to trigger | OpenCode defaults |
 | `ENGINE_SUBMIT_ENABLED` | allow real Kaggle submissions (R9) | `0` |
+| `ENGINE_DAILY_SUBMIT_LIMIT` | submissions per competition per UTC day (R9) | `5` |
 | `ENGINE_TARGET_SCORE` | default gate | unset (per-competition wins) |
 | `VERCEL_SYNC_URL` / `VERCEL_SYNC_TOKEN` | dashboard projection endpoint | unset |
 

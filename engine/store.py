@@ -239,3 +239,18 @@ def submissions(slug: str, settings: Settings | None = None) -> list[dict[str, A
             "SELECT * FROM submissions WHERE slug = ? ORDER BY id DESC", (slug,)
         ).fetchall()
         return [dict(r) for r in rows]
+
+
+def submissions_today(slug: str, settings: Settings | None = None) -> int:
+    """Successful submissions logged for this slug since UTC midnight.
+
+    ``submitted_at`` is an ISO-8601 UTC string, so a plain ``>= 'YYYY-MM-DD'``
+    comparison is correct (rule R9: respect the daily limit).
+    """
+    day_start = datetime.now(timezone.utc).date().isoformat()
+    with connection(settings) as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) AS n FROM submissions WHERE slug = ? AND submitted_at >= ?",
+            (slug, day_start),
+        ).fetchone()
+        return int(row["n"]) if row is not None else 0

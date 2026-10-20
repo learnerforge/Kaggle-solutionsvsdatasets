@@ -214,6 +214,12 @@ def maybe_submit(slug: str, *, message: str = "", settings: Settings | None = No
         return {"submitted": False, "reason": "ENGINE_SUBMIT_ENABLED is not set (rule R9)"}
     if not submission.is_file():
         return {"submitted": False, "reason": f"no submission file at {submission}"}
+    used = store.submissions_today(slug, settings)
+    if used >= settings.submit_daily_limit:
+        return {"submitted": False,
+                "reason": (f"daily submission limit reached ({used}/"
+                           f"{settings.submit_daily_limit} logged today, rule R9); "
+                           "resets at UTC midnight")}
     try:
         client = KaggleClient(settings)
         output = client.submit(slug, submission, message=message or "engine cycle")

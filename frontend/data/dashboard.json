@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T11:35:27+00:00",
+  "generated_at": "2026-10-20T06:10:08+00:00",
   "rules_version": "1.1.0",
   "repo_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets",
   "engine": {
@@ -7,19 +7,21 @@
     "notebook_timeout": 3600,
     "opencode_model": "default",
     "opencode_agent": "default",
+    "opencode_retries": 1,
     "submit_enabled": false,
+    "submit_daily_limit": 5,
     "kaggle_auth_ready": true,
     "vercel_sync": false
   },
   "stats": {
     "competitions": 3,
-    "runs": 6,
+    "runs": 7,
     "solved": 0,
     "last_run": {
-      "slug": "nlp-getting-started",
-      "phase": "code",
-      "status": "dry_run",
-      "finished_at": "2026-10-19T11:35:27+00:00"
+      "slug": "house-prices-advanced-regression-techniques",
+      "phase": "ask",
+      "status": "done",
+      "finished_at": "2026-10-20T06:07:17+00:00"
     },
     "gate_reached": 0,
     "tracked_on_disk": 3,
@@ -45,8 +47,8 @@
         "train/metrics.json missing \u2014 nothing measured yet (rule R4)"
       ],
       "status": "registered",
-      "attempts": 0,
-      "last_attempt_at": null,
+      "attempts": 1,
+      "last_attempt_at": "2026-10-20T06:07:17+00:00",
       "readme_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/house-prices-advanced-regression-techniques/readme.md",
       "notebook_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/house-prices-advanced-regression-techniques/code/house-prices-advanced-regression-techniques.ipynb",
       "problem_statement_url": "https://github.com/learnerforge/Kaggle-solutionsvsdatasets/blob/main/competition/house-prices-advanced-regression-techniques/PROBLEM_STATEMENT.md",
@@ -103,7 +105,18 @@
       ],
       "checks_failed": [],
       "checks_passed": true,
-      "history": []
+      "history": [
+        {
+          "attempt": 0,
+          "phase": "ask",
+          "status": "done",
+          "cv_mean": null,
+          "lb_score": null,
+          "score_reached": null,
+          "finished_at": "2026-10-20T06:07:17+00:00",
+          "notes": "Reply with exactly the single word PONG and nothing else. Do not read any files."
+        }
+      ]
     },
     {
       "slug": "nlp-getting-started",

@@ -92,6 +92,9 @@ class Settings:
 
     # extra tries after a transient coder failure (exit != 0 / empty response)
     opencode_retries: int = 1
+    # client-side daily submission cap (rule R9); Kaggle's own server-side
+    # limit still applies and may be tighter for some competitions
+    submit_daily_limit: int = 5
 
     def competition_dir(self, slug: str) -> Path:
         return self.competitions_root / slug
@@ -134,4 +137,5 @@ def load() -> Settings:
         vercel_sync_url=os.environ.get("VERCEL_SYNC_URL") or None,
         vercel_sync_token=os.environ.get("VERCEL_SYNC_TOKEN") or None,
         opencode_retries=_env_int("ENGINE_OPENCODE_RETRIES", 1),
+        submit_daily_limit=_env_int("ENGINE_DAILY_SUBMIT_LIMIT", 5),
     )
