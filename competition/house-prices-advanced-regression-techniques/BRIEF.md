@@ -5,7 +5,7 @@
 * Detected metric: `rmse` (lower is better)
 * Target column: `unknown`
 * Score gate: `not set`
-* Gathered: 2026-10-21T08:41:09+00:00
+* Gathered: 2026-10-22T08:43:21+00:00
 
 ## Files
 
